@@ -22,6 +22,7 @@
 *.layout
 *.cbp
 *.bak
+makefile
 
 ############  
 ## Windows  
