@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1475912613 source:/home/jason/Documents/CodeBlocks Projects/Senior Project/main.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_ttf.h>
+	<unordered_map>
+	<Mandelbrot.h>
+	<../constants.h>
+	<vector>
+
+1475904549 /home/jason/Documents/CodeBlocks Projects/Senior Project/include/Mandelbrot.h
+	<../constants.h>
+	<thread>
+	<vector>
+	<math.h>
+
+1475528198 /home/jason/Documents/CodeBlocks Projects/Senior Project/constants.h
+
+1475904559 source:/home/jason/Documents/CodeBlocks Projects/Senior Project/src/Mandelbrot.cpp
+	"Mandelbrot.h"
+
