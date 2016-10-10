@@ -5,7 +5,6 @@
 #include <Mandelbrot.h>
 #include <../constants.h>
 #include <vector>
-#include <pthread.h>
 
 using namespace std;
 
