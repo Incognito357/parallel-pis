@@ -23,6 +23,7 @@
 *.cbp
 *.bak
 makefile
+makefile.save
 
 ############  
 ## Windows  
