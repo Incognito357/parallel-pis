@@ -35,15 +35,23 @@ int main()
     };
 
     enum Palette {
-        Linear, Pre1, Pre2, PALETTE_SIZE
+        Linear, Pre1, Pre2, Pre3, Pre4, Pre5, PALETTE_SIZE
     };
 
     string StyleNames[] = { "Banded", "Smooth", "NULL" };
-    string PaletteNames[] = { "Linear", "Ultra Fractal", "Fire", "NULL" };
+    string PaletteNames[] = { "Linear", "Ultra Fractal", "Fire", "Rainbow", "Mint", "Frost", "NULL" };
 
     const int gradientScale = 256;
-    vector<float> stops[] { { 0, 0.16, 0.42, 0.6425, 0.8575, 1 }, { 0,  };
-    vector<SDL_Color> stopcols[] = { { { 0, 7, 100}, { 32, 107, 203}, { 237, 255, 255}, { 255, 170, 0}, { 0, 2, 0} } };
+    vector<float> stops[] { { 0, 0.16, 0.42, 0.6425, 0.8575, 1 },
+                            { 0, .33, .66, 1 },
+                            { 0, .2, .4, .6, 1 },
+                            { 0, .33, .66, 1 },
+                            { 0, .33, .66, 1 } };
+    vector<SDL_Color> stopcols[] = { { { 0, 7, 100 }, { 32, 107, 203 }, { 237, 255, 255 }, { 255, 170, 0 }, { 0, 2, 0 } },
+                                     { { 255, 0, 0 }, { 255, 255, 0 }, { 128, 0, 0 } },
+                                     { { 255, 0, 0 }, { 255, 255, 0 }, { 0, 255, 0 }, { 0, 0, 255 } },
+                                     { { 0, 32, 0 }, { 32, 192, 32 }, { 64, 255, 96 } },
+                                     { { 0, 64, 128 }, { 64, 192, 255 }, { 255, 255, 255 } } };
     vector<SDL_Color*> gradient;
 
     SDL_Color linearColor = { 255, 0, 0 };
@@ -56,9 +64,9 @@ int main()
             float f = (float)i / gradientScale;
             if (f > stops[p][n + 1]) n++;
             gradient[p][i] = {
-                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].r, stopcols[p][(n + 1) % 5].r),
-                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].g, stopcols[p][(n + 1) % 5].g),
-                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].b, stopcols[p][(n + 1) % 5].b)
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].r, stopcols[p][(n + 1) % stopcols[p].size()].r),
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].g, stopcols[p][(n + 1) % stopcols[p].size()].g),
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].b, stopcols[p][(n + 1) % stopcols[p].size()].b)
             };
         }
     }
@@ -199,11 +207,11 @@ int main()
                                     scale(k, 0, m.iter, 0, linearColor.g),
                                     scale(k, 0, m.iter, 0, linearColor.b), 255);
                                 break;
-                            case Pre1:
+                            default:
                                 SDL_SetRenderDrawColor(renderer,
-                                    gradient[palette][k % gradientScale].r,
-                                    gradient[palette][k % gradientScale].g,
-                                    gradient[palette][k % gradientScale].b, 255);
+                                    gradient[palette - 1][k % gradientScale].r,
+                                    gradient[palette - 1][k % gradientScale].g,
+                                    gradient[palette - 1][k % gradientScale].b, 255);
                                 break;
                         }
                     }
@@ -225,11 +233,11 @@ int main()
                                     scale(n - (int)n, 0, 1, a.b, b.b) , 255);
                                 break;
                             }
-                            case Pre1:
+                            default:
                                 SDL_SetRenderDrawColor(renderer,
-                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].r, gradient[palette][(k + 1) % gradientScale].r),
-                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].g, gradient[palette][(k + 1) % gradientScale].g),
-                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].b, gradient[palette][(k + 1) % gradientScale].b), 255);
+                                    scale(n - (int)n, 0, 1, gradient[palette - 1][k % gradientScale].r, gradient[palette - 1][(k + 1) % gradientScale].r),
+                                    scale(n - (int)n, 0, 1, gradient[palette - 1][k % gradientScale].g, gradient[palette - 1][(k + 1) % gradientScale].g),
+                                    scale(n - (int)n, 0, 1, gradient[palette - 1][k % gradientScale].b, gradient[palette - 1][(k + 1) % gradientScale].b), 255);
                                 break;
                         }
                     }
@@ -257,12 +265,12 @@ int main()
                 SDL_RenderCopy(renderer, tex, NULL, &r);
                 SDL_FreeSurface(txt);
             }
-            else if (palette == Pre1)
+            else
             {
                 for (int i = 0; i < gradientScale; i++)
                 {
-                    SDL_SetRenderDrawColor(renderer, gradient[palette][i].r, gradient[palette][i].g, gradient[palette][i].b, 255);
-                    SDL_RenderDrawLine(renderer, i + 120, 5, i + 120, 15);
+                    SDL_SetRenderDrawColor(renderer, gradient[palette - 1][i].r, gradient[palette - 1][i].g, gradient[palette - 1][i].b, 255);
+                    SDL_RenderDrawLine(renderer, 10, r.h + i + 5, 20, r.h + i + 5);
                 }
             }
 
