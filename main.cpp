@@ -5,6 +5,7 @@
 #include <Mandelbrot.h>
 #include <../constants.h>
 #include <vector>
+#include <pthread.h>
 
 using namespace std;
 
@@ -115,6 +116,7 @@ int main()
                 {
                     m.offx = loffx + (lx - mx) * m.zoom;
                     m.offy = loffy + (ly - my) * m.zoom;
+                    recalc = true;
                     //loffx = m.offx;
                    //loffy = m.offy;
                 }
@@ -180,10 +182,13 @@ int main()
             }
         }
 
+        SDL_Delay(1);
+
         if (recalc)
         {
             m.Update(vals);
             redraw = true;
+            recalc = false;
         }
 
         if (redraw)
