@@ -35,24 +35,32 @@ int main()
     };
 
     enum Palette {
-        Linear, Pre1, PALETTE_SIZE
+        Linear, Pre1, Pre2, PALETTE_SIZE
     };
 
     string StyleNames[] = { "Banded", "Smooth", "NULL" };
-    string PaletteNames[] = { "Linear", "Pre 1", "NULL" };
+    string PaletteNames[] = { "Linear", "Ultra Fractal", "Fire", "NULL" };
 
     const int gradientScale = 256;
-    const float stops[] = { 0, 0.16, 0.42, 0.6425, 0.8575, 1 };
-    SDL_Color stopcols[] = { { 0, 7, 100}, { 32, 107, 203}, { 237, 255, 255}, { 255, 170, 0}, { 0, 2, 0} };
-    SDL_Color *gradient = new SDL_Color[gradientScale];
+    vector<float> stops[] { { 0, 0.16, 0.42, 0.6425, 0.8575, 1 }, { 0,  };
+    vector<SDL_Color> stopcols[] = { { { 0, 7, 100}, { 32, 107, 203}, { 237, 255, 255}, { 255, 170, 0}, { 0, 2, 0} } };
+    vector<SDL_Color*> gradient;
 
     SDL_Color linearColor = { 255, 0, 0 };
 
-    for (int i = 0, n = 0; i < gradientScale; i++)
+    for (int p = 0; p < PALETTE_SIZE - 1; p++)
     {
-        float f = (float)i / gradientScale;
-        if (f > stops[n + 1]) n++;
-        gradient[i] = { scale(f, stops[n], stops[n + 1], stopcols[n].r, stopcols[(n + 1) % 5].r), scale(f, stops[n], stops[n + 1], stopcols[n].g, stopcols[(n + 1) % 5].g), scale(f, stops[n], stops[n + 1], stopcols[n].b, stopcols[(n + 1) % 5].b) };
+        gradient.push_back(new SDL_Color[gradientScale]);
+        for (int i = 0, n = 0; i < gradientScale; i++)
+        {
+            float f = (float)i / gradientScale;
+            if (f > stops[p][n + 1]) n++;
+            gradient[p][i] = {
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].r, stopcols[p][(n + 1) % 5].r),
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].g, stopcols[p][(n + 1) % 5].g),
+                scale(f, stops[p][n], stops[p][n + 1], stopcols[p][n].b, stopcols[p][(n + 1) % 5].b)
+            };
+        }
     }
 
     unordered_map<SDL_Keycode, bool> keys;
@@ -193,9 +201,9 @@ int main()
                                 break;
                             case Pre1:
                                 SDL_SetRenderDrawColor(renderer,
-                                    gradient[k % gradientScale].r,
-                                    gradient[k % gradientScale].g,
-                                    gradient[k % gradientScale].b, 255);
+                                    gradient[palette][k % gradientScale].r,
+                                    gradient[palette][k % gradientScale].g,
+                                    gradient[palette][k % gradientScale].b, 255);
                                 break;
                         }
                     }
@@ -219,9 +227,9 @@ int main()
                             }
                             case Pre1:
                                 SDL_SetRenderDrawColor(renderer,
-                                    scale(n - (int)n, 0, 1, gradient[k % gradientScale].r, gradient[(k + 1) % gradientScale].r),
-                                    scale(n - (int)n, 0, 1, gradient[k % gradientScale].g, gradient[(k + 1) % gradientScale].g),
-                                    scale(n - (int)n, 0, 1, gradient[k % gradientScale].b, gradient[(k + 1) % gradientScale].b), 255);
+                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].r, gradient[palette][(k + 1) % gradientScale].r),
+                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].g, gradient[palette][(k + 1) % gradientScale].g),
+                                    scale(n - (int)n, 0, 1, gradient[palette][k % gradientScale].b, gradient[palette][(k + 1) % gradientScale].b), 255);
                                 break;
                         }
                     }
@@ -253,7 +261,7 @@ int main()
             {
                 for (int i = 0; i < gradientScale; i++)
                 {
-                    SDL_SetRenderDrawColor(renderer, gradient[i].r, gradient[i].g, gradient[i].b, 255);
+                    SDL_SetRenderDrawColor(renderer, gradient[palette][i].r, gradient[palette][i].g, gradient[palette][i].b, 255);
                     SDL_RenderDrawLine(renderer, i + 120, 5, i + 120, 15);
                 }
             }
