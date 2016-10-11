@@ -55,6 +55,7 @@ int main()
     vector<SDL_Color*> gradient;
 
     SDL_Color linearColor = { 255, 0, 0 };
+    SDL_Color backColor = { 0, 0, 0 };
 
     for (int p = 0; p < PALETTE_SIZE - 1; p++)
     {
@@ -85,6 +86,7 @@ int main()
 
     bool redraw = false;
     bool recalc = true;
+    bool changeBack = false;
     long double loffx = 0, loffy = 0;
     SDL_Event e;
     while (true)
@@ -100,6 +102,7 @@ int main()
                     case SDLK_ESCAPE: return 0;
                     case SDLK_r: recalc = true; break;
                     case SDLK_t: redraw = true; break;
+                    case SDLK_b: changeBack = !changeBack; redraw = true; break;
                     case SDLK_s: style = (Style)((style + 1) % STYLE_SIZE);
                         redraw = true;
                         break;
@@ -154,12 +157,13 @@ int main()
                 }
             }
 
+            SDL_Color tmp = (changeBack ? backColor : linearColor);
             if (keys[SDLK_KP_PLUS] && e.key.keysym.sym == SDLK_KP_PLUS)
             {
                 if (keys[SDLK_i]) m.iter++;
-                if (keys[SDLK_KP_1]) linearColor.r = min(255, linearColor.r + 1);
-                if (keys[SDLK_KP_2]) linearColor.g = min(255, linearColor.g + 1);
-                if (keys[SDLK_KP_3]) linearColor.b = min(255, linearColor.b + 1);
+                if (keys[SDLK_KP_1]) (changeBack ? backColor.r : linearColor.r) = min(255, (changeBack ? backColor.r : linearColor.r) + 1);
+                if (keys[SDLK_KP_2]) (changeBack ? backColor.g : linearColor.g) = min(255, (changeBack ? backColor.g : linearColor.g) + 1);
+                if (keys[SDLK_KP_3]) (changeBack ? backColor.b : linearColor.b) = min(255, (changeBack ? backColor.b : linearColor.b) + 1);
 
                 if (m.iter > MAX_ITER) m.iter = MAX_ITER;
             }
@@ -167,9 +171,9 @@ int main()
             if (keys[SDLK_KP_MINUS] && e.key.keysym.sym == SDLK_KP_MINUS)
             {
                 if (keys[SDLK_i]) m.iter--;
-                if (keys[SDLK_KP_1]) linearColor.r = max(0, linearColor.r - 1);
-                if (keys[SDLK_KP_2]) linearColor.g = max(0, linearColor.g - 1);
-                if (keys[SDLK_KP_3]) linearColor.b = max(0, linearColor.b - 1);
+                if (keys[SDLK_KP_1]) (changeBack ? backColor.r : linearColor.r) = max(0, (changeBack ? backColor.r : linearColor.r) - 1);
+                if (keys[SDLK_KP_2]) (changeBack ? backColor.g : linearColor.g) = max(0, (changeBack ? backColor.g : linearColor.g) - 1);
+                if (keys[SDLK_KP_3]) (changeBack ? backColor.b : linearColor.b) = max(0, (changeBack ? backColor.b : linearColor.b) - 1);
 
                 if (m.iter < 2) m.iter = 2;
             }
@@ -179,6 +183,8 @@ int main()
                 recalc = true;
                 lastiter = m.iter;
             }
+
+            if (tmp.r != (changeBack ? backColor.r : linearColor.r) || tmp.g != (changeBack ? backColor.g : linearColor.g) || tmp.b != (changeBack ? backColor.b : linearColor.b)) redraw = true;
         }
 
         SDL_Delay(1);
@@ -192,7 +198,7 @@ int main()
 
         if (redraw)
         {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(renderer, backColor.r, backColor.g, backColor.b, 255);
             SDL_RenderClear(renderer);
             for (int y = 0; y < SCREEN_HEIGHT; y++)
             {
@@ -249,7 +255,8 @@ int main()
                 }
             }
 
-            string s = "Palette: " + PaletteNames[palette] + "\n" +
+            string s = "Palette: " + string(!changeBack ? "* " : "") + PaletteNames[palette] + "\n" +
+                        "Inside: " + (changeBack ? "* " : "") + "{ " + to_string(backColor.r) + ", " + to_string(backColor.g) + ", " + to_string(backColor.b) + " }\n" +
                         "Style: " + StyleNames[style] + "\n" +
                         "Iters: " + to_string(m.iter);
 
