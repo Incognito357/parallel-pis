@@ -5,6 +5,9 @@
 #include <Mandelbrot.h>
 #include <../constants.h>
 #include <vector>
+//print more decimal places
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -87,6 +90,7 @@ int main()
     bool redraw = false;
     bool recalc = true;
     bool changeBack = false;
+    bool hideVals = false;
     long double loffx = 0, loffy = 0;
     SDL_Event e;
     while (true)
@@ -109,6 +113,7 @@ int main()
                     case SDLK_a: palette = (Palette)((palette + 1) % PALETTE_SIZE);
                         redraw = true;
                         break;
+                    case SDLK_z: hideVals = !hideVals; redraw = true; break;
                 }
             }
             else if (e.type == SDL_KEYUP && keys[e.key.keysym.sym]) keys[e.key.keysym.sym] = false;
@@ -255,10 +260,16 @@ int main()
                 }
             }
 
+            ostringstream zoom;
+            ostringstream bounds;
+            zoom << setprecision(24) << fixed << m.zoom;
+            bounds << setprecision(24) << fixed << "   " << m.offx << ",\n   " << m.offy;
             string s = "Palette: " + string(!changeBack ? "* " : "") + PaletteNames[palette] + "\n" +
                         "Inside: " + (changeBack ? "* " : "") + "{ " + to_string(backColor.r) + ", " + to_string(backColor.g) + ", " + to_string(backColor.b) + " }\n" +
                         "Style: " + StyleNames[style] + "\n" +
-                        "Iters: " + to_string(m.iter);
+                        "Iters: " + to_string(m.iter) + "\n" + (hideVals ? "" :
+                        "Zoom: " + zoom.str() + "\n" +
+                        "Center: {\n" + bounds.str() + "\n}");
 
             SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
