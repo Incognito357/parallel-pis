@@ -6,15 +6,13 @@ int main()
 {
     Mandelbrot m;
 
-    double *vals;
+    double *vals = new double[1200 * 900];
 
     while (true)
     {
         #ifdef MASTER
 
-        //m.Update(vals);
-
-        printf("test\n");
+        m.Update(vals);
 
         #endif
     }
