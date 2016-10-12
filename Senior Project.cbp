@@ -30,31 +30,6 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
-			<Target title="Server-Master">
-				<Option output="bin/Debug/Senior Project" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
-				<Compiler>
-					<Add option="-O3" />
-					<Add option="-g" />
-					<Add option="-DMASTER" />
-					<Add directory="include" />
-				</Compiler>
-			</Target>
-			<Target title="Server-Client">
-				<Option output="bin/Debug/Senior Project" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
-				<Compiler>
-					<Add option="-O3" />
-					<Add option="-g" />
-					<Add directory="include" />
-				</Compiler>
-			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-std=c++0x" />
@@ -65,6 +40,7 @@
 			<Add option="-lSDL2_ttf" />
 			<Add library="SDL2" />
 		</Linker>
+		<Unit filename="constants.h" />
 		<Unit filename="include/Mandelbrot.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/Mandelbrot.cpp" />
