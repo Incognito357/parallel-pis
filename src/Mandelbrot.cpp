@@ -7,13 +7,11 @@ Mandelbrot::Mandelbrot()
 
 void Mandelbrot::Update(double *vals) const
 {
-    #ifdef MASTER
     int step = height / thread::hardware_concurrency();
     vector<thread> threads;
     for (int i = 0; i < height; i += step)
         threads.push_back(thread(&Mandelbrot::Slice, *this, ref(vals), i, min(i + step, height)));
     for (auto &t : threads) t.join();
-    #endif
 }
 
 void Mandelbrot::Slice(double *vals, int minY, int maxY) const
