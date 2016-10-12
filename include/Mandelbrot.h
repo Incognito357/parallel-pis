@@ -1,7 +1,6 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
-#include <../constants.h>
 #include <thread>
 #include <vector>
 #include <math.h>
@@ -16,6 +15,7 @@ class Mandelbrot
         int iter = 150;
         long double zoom = 0.004;
         long double offx = 0, offy = 0;
+        int width = 1200, height = 900;
     protected:
     private:
         void Slice(double* vals, int minY, int maxY) const;
