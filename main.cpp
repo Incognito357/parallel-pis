@@ -36,7 +36,8 @@ int main()
     fd_set fds;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
-    if ((master_socket = socket(AF_INET, SOCK_STREAM, 0) < 0))
+    master_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (master_socket < 0)
     {
         printf("Could not create socket: %d\n", errno);
         return -1;
