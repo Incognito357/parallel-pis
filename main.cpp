@@ -38,7 +38,7 @@ int main()
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
     if ((master_socket = socket(AF_INET, SOCK_STREAM, 0) == 0))
     {
-        printf("Could not create socket.");
+        printf("Could not create socket.\n");
         return -1;
     }
 
@@ -48,7 +48,7 @@ int main()
 
     if (bind(master_socket, (struct sockaddr*)&addr, sizeof(addr)) < 0)
     {
-        printf("Could not bind port");
+        printf("Could not bind port\n");
         return -1;
     }
 
@@ -56,7 +56,7 @@ int main()
 
     if (listen(master_socket, 5) < 0)
     {
-        printf("Could not listen");
+        printf("Could not listen\n");
         return -1;
     }
 
@@ -93,7 +93,7 @@ int main()
             int newsock = accept(master_socket, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
             if (newsock < 0)
             {
-                printf("Could not accept client");
+                printf("Could not accept client\n");
                 return -1;
             }
 
@@ -101,8 +101,8 @@ int main()
 
             char* msg = "You have just connected to Master Pi!\n";
             int msglen = strlen(msg);
-            if (send(newsock, msg, msglen, 0) != msglen) printf("Could not send message");
-            else printf("Greeted %s", inet_ntoa(addr.sin_addr));
+            if (send(newsock, msg, msglen, 0) != msglen) printf("Could not send message\n");
+            else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
             {
