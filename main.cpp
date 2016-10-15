@@ -115,7 +115,9 @@ int main()
         return -1;
     }
 
-    printf("Connecting to %s:%d\n", inet_ntoa(((struct sockaddr_in*)i)->sin_addr), ntohs(((struct sockaddr_in*)i)->sin_port));
+    char s[INET_ADDRSTRLEN];
+    inet_ntop(i->ai_family, &((struct sockaddr_in*)((struct sockaddr*)i->ai_addr))->sin_addr, s, sizeof(s));
+    printf("Connecting to %s\n", s);
 
     freeaddrinfo(serv);
 
