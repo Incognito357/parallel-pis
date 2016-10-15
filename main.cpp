@@ -151,7 +151,7 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char* msg = "You have just connected to Master Pi!\n";
+            char* msg = "You have just connected to Master Pi!";
             int msglen = strlen(msg);
             if (send(newsock, msg, msglen, 0) != msglen) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
@@ -184,7 +184,7 @@ int main()
                 {
                     buf[val - 2] = 0;
                     printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                    char* msg = "Received message\n";
+                    char* msg = "Received message";
                     send(s, msg, strlen(msg), 0);
                 }
             }
