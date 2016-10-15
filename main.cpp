@@ -142,7 +142,7 @@ int main()
                     buf[val - 1] = 0;
                     printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                     char* msg = "Received message\n";
-                    send(s, msg, strlen(buf), 0);
+                    send(s, msg, strlen(msg), 0);
                 }
             }
         }
