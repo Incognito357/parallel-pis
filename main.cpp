@@ -139,7 +139,7 @@ int main()
                 }
                 else
                 {
-                    buf[val - 1] = 0;
+                    buf[val - 2] = 0;
                     printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                     char* msg = "Received message\n";
                     send(s, msg, strlen(msg), 0);
