@@ -95,14 +95,14 @@ int main()
     {
         if ((sock = socket(i->ai_family, i->ai_socktype, i->ai_protocol)) == -1)
         {
-            printf("Could not create socket");
+            printf("Could not create socket: %d\n", errno);
             continue;
         }
 
         if (connect(sock, i->ai_addr, i->ai_addrlen) < 0)
         {
             close(sock);
-            printf("Could not connect to host\n");
+            printf("Could not connect to host: %d\n", errno);
             continue;
         }
 
