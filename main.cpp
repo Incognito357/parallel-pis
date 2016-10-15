@@ -22,7 +22,7 @@
 
 #include <Mandelbrot.h>
 #define HOSTPORT "31415"
-#define HOSTADDR "10.3.14.15"
+#define HOSTADDR "10.3.14.5"
 
 #endif
 
