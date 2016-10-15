@@ -193,10 +193,10 @@ int main()
         #else
 
         ret = recv(sock, buf, MAXBUF, 0);
-        if (ret < 0)
+        if (ret == 0)
         {
-            printf("Error receiving message");
-            return -1;
+            printf("Server closed connection\n");
+            break;
         }
 
         buf[ret] = 0;
