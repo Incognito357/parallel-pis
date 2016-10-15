@@ -42,8 +42,8 @@ int main()
         return -1;
     }
 
-    char opt = 1;
-    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    int opt = 1;
+    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
     {
         printf("Could not set socket options\n");
         return -1;
