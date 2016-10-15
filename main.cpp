@@ -42,6 +42,13 @@ int main()
         return -1;
     }
 
+    char opt = 1;
+    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        printf("Could not set socket options\n");
+        return -1;
+    }
+
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(HOSTPORT);
