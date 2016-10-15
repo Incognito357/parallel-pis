@@ -36,16 +36,16 @@ int main()
     fd_set fds;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
-    if ((master_socket = socket(AF_INET, SOCK_STREAM, 0) == 0))
+    if ((master_socket = socket(AF_INET, SOCK_STREAM, 0) < 0))
     {
-        printf("Could not create socket.\n");
+        printf("Could not create socket: %d\n", errno);
         return -1;
     }
 
     int opt = 1;
-    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
+    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
     {
-        printf("Could not set socket options\n");
+        printf("Could not set socket options: %d\n", errno);
         return -1;
     }
 
@@ -55,7 +55,7 @@ int main()
 
     if (bind(master_socket, (struct sockaddr*)&addr, sizeof(addr)) < 0)
     {
-        printf("Could not bind port\n");
+        printf("Could not bind port: %d\n", errno);
         return -1;
     }
 
@@ -63,7 +63,7 @@ int main()
 
     if (listen(master_socket, 5) < 0)
     {
-        printf("Could not listen\n");
+        printf("Could not listen: %d\n", errno);
         return -1;
     }
 
