@@ -9,17 +9,19 @@
 #include <netdb.h>
 #include <errno.h>
 
-#define HOSTPORT 31415
+#define MAXBUF 1024
 
 #ifdef MASTER
 
 #include <sys/time.h>
 #include <vector>
+#define HOSTPORT 31415
 #define MAXCLIENTS 10
 
 #else
 
 #include <Mandelbrot.h>
+#define HOSTPORT "31415"
 #define HOSTADDR "10.3.14.15"
 
 #endif
@@ -29,22 +31,24 @@ using namespace std;
 int main()
 {
     struct sockaddr_in addr;
+    int sock;
+    char buf[MAXBUF + 1];
 
     #ifdef MASTER
 
-    int addrlen, master_socket, new_socket, clients[MAXCLIENTS];
+    int clients[MAXCLIENTS];
     fd_set fds;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
-    master_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (master_socket < 0)
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
     {
         printf("Could not create socket: %d\n", errno);
         return -1;
     }
 
     int opt = 1;
-    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
     {
         printf("Could not set socket options: %d\n", errno);
         return -1;
@@ -54,7 +58,7 @@ int main()
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(HOSTPORT);
 
-    if (bind(master_socket, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
     {
         printf("Could not bind port: %d\n", errno);
         return -1;
@@ -62,18 +66,58 @@ int main()
 
     printf("Listening on port %d\n", HOSTPORT);
 
-    if (listen(master_socket, 5) < 0)
+    if (listen(sock, 5) < 0)
     {
         printf("Could not listen: %d\n", errno);
         return -1;
     }
 
-    addrlen = sizeof(addr);
+    int addrlen = sizeof(addr);
     printf("Waiting for connections\n");
 
     #else
 
+    struct addrinfo hints, *serv;
+    memset(&hints, 0, sizeof(hints));
 
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int ret = getaddrinfo(HOSTADDR, HOSTPORT, &hints, &serv);
+    if (ret != 0)
+    {
+        printf("Could not get address info: %s\n", gai_strerror(ret));
+        return -1;
+    }
+
+    struct addrinfo *i;
+    for (i = serv; i != NULL; i = i->ai_next)
+    {
+        if ((sock = socket(i->ai_family, i->ai_socktype, i->ai_protocol)) == -1)
+        {
+            printf("Could not create socket");
+            continue;
+        }
+
+        if (connect(sock, i->ai_addr, i->ai_addrlen) < 0)
+        {
+            close(sock);
+            printf("Could not connect to host\n");
+            continue;
+        }
+
+        break;
+    }
+
+    if (i == NULL)
+    {
+        printf("Could not connect\n");
+        return -1;
+    }
+
+    printf("Connecting to %s:%d\n", inet_ntoa(((struct sockaddr_in*)i)->sin_addr), ntohs(((struct sockaddr_in*)i)->sin_port));
+
+    freeaddrinfo(serv);
 
     #endif
 
@@ -83,8 +127,8 @@ int main()
 
         FD_ZERO(&fds);
 
-        FD_SET(master_socket, &fds);
-        int ms = master_socket;
+        FD_SET(sock, &fds);
+        int ms = sock;
         for (int i = 0; i < MAXCLIENTS; i++)
         {
             int s = clients[i];
@@ -96,9 +140,9 @@ int main()
 
         if (activity < 0 && errno != EINTR) printf("'select' error\n");
 
-        if (FD_ISSET(master_socket, &fds))
+        if (FD_ISSET(sock, &fds))
         {
-            int newsock = accept(master_socket, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
+            int newsock = accept(sock, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
             if (newsock < 0)
             {
                 printf("Could not accept client\n");
@@ -128,8 +172,7 @@ int main()
             int s = clients[i];
             if (FD_ISSET(s, &fds))
             {
-                char buf[1025];
-                int val = read(s, buf, 1024);
+                int val = read(s, buf, MAXBUF);
                 getpeername(s, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
                 if (val == 0)
                 {
@@ -149,14 +192,18 @@ int main()
 
         #else
 
+        ret = recv(sock, buf, MAXBUF, 0);
+        if (ret < 0)
+        {
+            printf("Error receiving message");
+            return -1;
+        }
 
+        buf[ret] = 0;
+        printf("Server: \"%s\"\n", buf);
 
         #endif
     }
 
-    #ifdef MASTER
-
-
-
-    #endif
+    close(sock);
 }
