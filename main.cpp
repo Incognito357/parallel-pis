@@ -30,12 +30,12 @@ using namespace std;
 
 int main()
 {
-    struct sockaddr_in addr;
     int sock;
     char buf[MAXBUF + 1];
 
     #ifdef MASTER
 
+    struct sockaddr_in addr;
     int clients[MAXCLIENTS];
     fd_set fds;
 

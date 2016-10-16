@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-g" />
@@ -22,6 +23,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 				<Compiler>
 					<Add directory="include" />
 				</Compiler>
@@ -29,31 +31,80 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
-			<Target title="Server-Master">
+			<Target title="Client">
 				<Option output="bin/Debug/Senior Project" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-O3" />
-					<Add option="-std=c++0x" />
+					<Add option="-g" />
+					<Add option="-DCLIENT" />
+					<Add directory="include" />
+				</Compiler>
+			</Target>
+			<Target title="Server - Master">
+				<Option output="bin/Debug/Server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
 					<Add option="-g" />
 					<Add option="-DMASTER" />
 					<Add directory="include" />
 				</Compiler>
 			</Target>
-			<Target title="Server-Client">
-				<Option output="bin/Debug/Senior Project" prefix_auto="1" extension_auto="1" />
+			<Target title="Server - Client">
+				<Option output="bin/Debug/Client" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-g" />
 					<Add directory="include" />
 				</Compiler>
+			</Target>
+			<Target title="Client R">
+				<Option output="bin/Release/Senior Project" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-DCLIENT" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Server - Master R">
+				<Option output="bin/Release/Server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-DMASTER" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Server - Client R">
+				<Option output="bin/Release/Client" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
