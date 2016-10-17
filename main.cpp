@@ -248,7 +248,7 @@ int main()
             Message reply;
             reply.type = Text;
             reply.size = strlen(msg);
-            int suc = send(newsock, &reply, sizeof(Message), MSG_MORE) + send(newsock, &msg, reply.size, 0);
+            int suc = send(newsock, &reply, sizeof(Message), 0) + send(newsock, &msg, reply.size, 0);
             if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
@@ -315,7 +315,7 @@ int main()
                             Message reply;
                             reply.type = Text;
                             reply.size = strlen(msg);
-                            send(s, &reply, sizeof(Message), MSG_MORE);
+                            send(s, &reply, sizeof(Message), 0);
                             send(s, &msg, reply.size, 0);
                             break;
                     }
