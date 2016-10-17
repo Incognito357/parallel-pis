@@ -245,8 +245,11 @@ int main()
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
             char* msg = "You have just connected to Master Pi!";
-            int msglen = strlen(msg);
-            if (send(newsock, msg, msglen, 0) != msglen) printf("Could not send message\n");
+            Message reply;
+            reply.type = Text;
+            reply.size = strlen(msg);
+            int suc = send(newsock, &reply, sizeof(Message), MSG_MORE) + send(newsock, &msg, reply.size, 0);
+            if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
