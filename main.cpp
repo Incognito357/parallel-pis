@@ -249,7 +249,7 @@ int main()
             reply.type = Text;
             reply.size = strlen(msg);
             printf("Sending %s %d bytes\n", inet_ntoa(addr.sin_addr), reply.size);
-            int suc = send(newsock, &reply, sizeof(Message), 0) + send(newsock, &msg, reply.size, 0);
+            int suc = send(newsock, &reply, sizeof(m), 0) + send(newsock, &msg, reply.size, 0);
             if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
@@ -269,7 +269,7 @@ int main()
             int s = clients[i];
             if (FD_ISSET(s, &fds))
             {
-                int val = read(s, &m, sizeof(Message));
+                int val = read(s, &m, sizeof(m));
                 getpeername(s, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
                 if (val == 0)
                 {
@@ -316,7 +316,7 @@ int main()
                             Message reply;
                             reply.type = Text;
                             reply.size = strlen(msg);
-                            send(s, &reply, sizeof(Message), 0);
+                            send(s, &reply, sizeof(reply), 0);
                             send(s, &msg, reply.size, 0);
                             break;
                     }
@@ -326,7 +326,7 @@ int main()
 
         #else
 
-        ret = recv(sock, &m, sizeof(Message), MSG_DONTWAIT);
+        ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
         if (ret == 0)
         {
             printf("Server closed connection\n");
@@ -367,7 +367,7 @@ int main()
                 case MessageType::Text:
                     char* buf = new char[m.size];
                     int ret = read(sock, &buf, m.size);
-                    printf("Text event, expected buf size: %d, received: %d", m.size, ret);
+                    printf("Text event, expected buf size: %d, received: %d\n", m.size, ret);
                     printf("-> Server: \"%s\"\n", buf);
                     break;
             }
