@@ -366,7 +366,7 @@ int main()
                 case MessageType::Text:
                     char* buf = new char[m.size];
                     int ret = read(sock, &buf, m.size);
-                    printf("Text event, expected buf size: %d, received: %d", m.size, ret);
+                    printf("Text event, expected buf size: %zu, received: %d", m.size, ret);
                     printf("-> Server: \"%s\"\n", buf);
                     break;
             }
