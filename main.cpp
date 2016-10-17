@@ -254,7 +254,7 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char *test = "You have just connected to Master Pi!";
+            char *test = "ab";
             if (SendText(newsock, test) <= 0) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
@@ -337,7 +337,7 @@ int main()
 
         if (ret > 0)
         {
-            printf("Received header %d size %d", m.type, ret);
+            printf("Received header type %d size %d", m.type, ret);
             switch (m.type)
             {
                 case MessageType::Recalc:
