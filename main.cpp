@@ -27,6 +27,8 @@ double scale(double v, double vl, double vh, double nl, double nh)
     return nl + (nh - nl) * (v - vl) / (vh - vl);
 }
 
+#define RETRYATTEMPTS 5
+
 #elif defined MASTER
 
 #include <sys/time.h>
@@ -37,6 +39,7 @@ double scale(double v, double vl, double vh, double nl, double nh)
 #else
 
 #include <Mandelbrot.h>
+#define RETRYATTEMPTS -1
 
 #endif
 
@@ -112,28 +115,33 @@ int main()
     }
 
     struct addrinfo *i;
-    for (i = serv; i != NULL; i = i->ai_next)
+    for (int r = 0; r < RETRYATTEMPTS; r++)
     {
-        if ((sock = socket(i->ai_family, i->ai_socktype, i->ai_protocol)) == -1)
+        for (i = serv; i != NULL; i = i->ai_next)
         {
-            printf("Could not create socket: %d\n", errno);
-            continue;
+            if ((sock = socket(i->ai_family, i->ai_socktype, i->ai_protocol)) == -1)
+            {
+                printf("Could not create socket: %d\n", errno);
+                continue;
+            }
+
+            if (connect(sock, i->ai_addr, i->ai_addrlen) < 0)
+            {
+                close(sock);
+                printf("Could not connect to host: %d\n", errno);
+                continue;
+            }
+
+            break;  //successful connection, don't try to connect to more
         }
 
-        if (connect(sock, i->ai_addr, i->ai_addrlen) < 0)
+        if (i == NULL) printf("Retrying, attempt %d of %d", r, RETRYATTEMPTS);
+        else if (i == NULL && r == RETRYATTEMPTS - 1)
         {
-            close(sock);
-            printf("Could not connect to host: %d\n", errno);
-            continue;
+            printf("Could not connect.\n");
+            return -1;
         }
-
-        break;
-    }
-
-    if (i == NULL)
-    {
-        printf("Could not connect\n");
-        return -1;
+        else break; //successful connection
     }
 
     char s[INET_ADDRSTRLEN];
