@@ -39,7 +39,7 @@ double scale(double v, double vl, double vh, double nl, double nh)
 #else
 
 #include <Mandelbrot.h>
-#define RETRYATTEMPTS -1
+#define RETRYATTEMPTS 9999
 
 #endif
 
