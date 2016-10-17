@@ -314,8 +314,9 @@ int main()
 
                             break;
                         case MessageType::Text:
-                            char* buf = new char[m.len];
+                            char* buf = new char[m.len + 1];
                             read(s, &buf, m.len);
+                            buf[m.len] = 0;
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             //SendText(s, "Received message");
                             break;
@@ -366,8 +367,9 @@ int main()
 
                     break;
                 case MessageType::Text:
-                    char* buf = new char[m.len];
+                    char* buf = new char[m.len + 1];
                     int ret = read(sock, &buf, m.len);
+                    buf[m.len] = 0;
                     printf("Text event, expected buf size: %d, received: %d\n", m.len, ret);
                     printf("-> Server: \"%s\"\n", buf);
                     SendText(sock, "Received message");
