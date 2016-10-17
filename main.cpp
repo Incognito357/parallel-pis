@@ -142,6 +142,8 @@ int main()
             return -1;
         }
         else break; //successful connection
+
+        sleep(1);
     }
 
     char s[INET_ADDRSTRLEN];
