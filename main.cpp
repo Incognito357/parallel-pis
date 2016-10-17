@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -244,10 +245,10 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char* msg = "You have just connected to Master Pi!";
+            string msg = "You have just connected to Master Pi!";
             Message reply;
             reply.type = Text;
-            reply.size = strlen(msg);
+            reply.size = msg.length();
             int suc = send(newsock, &reply, sizeof(Message), MSG_MORE) + send(newsock, &msg, reply.size, 0);
             if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
@@ -311,10 +312,10 @@ int main()
                             char* buf = new char[m.size];
                             read(s, &buf, m.size);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                            char* msg = "Received message";
+                            string msg = "Received message";
                             Message reply;
                             reply.type = Text;
-                            reply.size = strlen(msg);
+                            reply.size = msg.length();
                             send(s, &reply, sizeof(Message), MSG_MORE);
                             send(s, &msg, reply.size, 0);
                             break;
