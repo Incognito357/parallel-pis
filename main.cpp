@@ -336,9 +336,7 @@ int main()
         #else
 
         //printf("sizeof m: %d\n", (int)sizeof(m));
-        char tempbuf[4096];
-        //ret = recv(sock, &m, sizeof(Message), NULL);
-        ret = recv(sock, &tempbuf, 4095, NULL);
+        ret = recv(sock, &m, sizeof(m), NULL);
 
         if (ret < 0)
         {
