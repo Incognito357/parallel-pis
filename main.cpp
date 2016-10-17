@@ -10,8 +10,6 @@
 #include <errno.h>
 #include <defines.h>
 
-#define MAXBUF 1024
-
 #ifdef CLIENT
 
 #include <SDL2/SDL.h>
@@ -27,35 +25,14 @@ double scale(double v, double vl, double vh, double nl, double nh)
     return nl + (nh - nl) * (v - vl) / (vh - vl);
 }
 
-#define RETRYATTEMPTS 5
-
-#elif defined MASTER
-
-#include <sys/time.h>
-#include <vector>
-#define HOSTPORT 31415
-#define MAXCLIENTS 10
-
-#else
-
-#include <Mandelbrot.h>
-#define RETRYATTEMPTS 9999
-
-#endif
-
-#ifndef MASTER
-
-#define HOSTPORT "31415"
-#define HOSTADDR "10.3.14.5"
-
 #endif
 
 using namespace std;
 
 int main()
 {
+    Message m;
     int sock;
-    char buf[MAXBUF + 1];
 
     #ifdef MASTER
 
@@ -161,7 +138,7 @@ int main()
     SDL_Renderer *renderer;
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *w;
-    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &w, &renderer);
+    SDL_CreateWindowAndRenderer(INIT_SCREEN_WIDTH, INIT_SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &w, &renderer);
     SDL_SetWindowTitle(w, "Test");
 
     TTF_Init();
@@ -226,7 +203,7 @@ int main()
     int lastiter = INIT_ITER;
     Style style = Banded;
     Palette palette = Linear;
-    double *vals = new double[SCREEN_HEIGHT * SCREEN_WIDTH]();
+    double *vals = new double[INIT_SCREEN_HEIGHT * INIT_SCREEN_WIDTH]();
 
     bool redraw = false;
     bool recalc = true;
@@ -288,7 +265,7 @@ int main()
             int s = clients[i];
             if (FD_ISSET(s, &fds))
             {
-                int val = read(s, buf, MAXBUF);
+                int val = read(s, &m, sizeof(Message));
                 getpeername(s, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
                 if (val == 0)
                 {
@@ -298,32 +275,98 @@ int main()
                 }
                 else
                 {
-                    buf[val - 2] = 0;
-                    printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                    char* msg = "Received message";
-                    send(s, msg, strlen(msg), 0);
+                    switch (m.type)
+                    {
+                        case MessageType::Recalc:
+
+                            break;
+                        case MessageType::OffX:
+
+                            break;
+                        case MessageType::OffY:
+
+                            break;
+                        case MessageType::Iter:
+
+                            break;
+                        case MessageType::Zoom:
+
+                            break;
+                        case MessageType::Connections:
+
+                            break;
+                        case MessageType::ResX:
+
+                            break;
+                        case MessageType::ResY:
+
+                            break;
+                        case MessageType::Vals:
+
+                            break;
+                        case MessageType::Text:
+                            char* buf = new char[m.size];
+                            read(s, &buf, m.size);
+                            printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
+                            char* msg = "Received message";
+                            Message reply;
+                            reply.type = Text;
+                            reply.size = strlen(msg);
+                            send(s, &reply, sizeof(Message), MSG_MORE);
+                            send(s, &msg, reply.size, 0);
+                            break;
+                    }
                 }
             }
         }
 
         #else
 
-        ret = recv(sock, buf, MAXBUF, MSG_DONTWAIT);
+        ret = recv(sock, &m, sizeof(Message), MSG_DONTWAIT);
         if (ret == 0)
         {
             printf("Server closed connection\n");
             break;
         }
 
-        #ifndef CLIENT
-
         if (ret > 0)
         {
-            buf[ret] = 0;
-            printf("Server: \"%s\"\n", buf);
+            switch (m.type)
+            {
+                case MessageType::Recalc:
+
+                    break;
+                case MessageType::OffX:
+
+                    break;
+                case MessageType::OffY:
+
+                    break;
+                case MessageType::Iter:
+
+                    break;
+                case MessageType::Zoom:
+
+                    break;
+                case MessageType::Connections:
+
+                    break;
+                case MessageType::ResX:
+
+                    break;
+                case MessageType::ResY:
+
+                    break;
+                case MessageType::Vals:
+
+                    break;
+                case MessageType::Text:
+                    char* buf = new char[m.size];
+                    printf("-> Server: \"%s\"\n", buf);
+                    break;
+            }
         }
 
-        #endif
         #endif
 
         #ifdef CLIENT
@@ -384,7 +427,7 @@ int main()
                     //loffx = m.offx = loffx + (mx * m.zoom) - ((SCREEN_WIDTH / 2.0) * m.zoom);
                     //loffy = m.offy = loffy + (my * m.zoom) - ((SCREEN_HEIGHT / 2.0) * m.zoom);
                     //m.zoom /= 1.1 * e.wheel.y;
-                    SDL_WarpMouseInWindow(w, SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
+                    SDL_WarpMouseInWindow(w, INIT_SCREEN_WIDTH / 2.0, INIT_SCREEN_HEIGHT / 2.0);
                     recalc = true;
                 }
                 else if (e.wheel.y < 0)
@@ -442,11 +485,11 @@ int main()
         {
             SDL_SetRenderDrawColor(renderer, backColor.r, backColor.g, backColor.b, 255);
             SDL_RenderClear(renderer);
-            for (int y = 0; y < SCREEN_HEIGHT; y++)
+            for (int y = 0; y < INIT_SCREEN_HEIGHT; y++)
             {
-                for (int x = 0; x < SCREEN_WIDTH; x++)
+                for (int x = 0; x < INIT_SCREEN_WIDTH; x++)
                 {
-                    double n = vals[y * SCREEN_WIDTH + x];
+                    double n = vals[y * INIT_SCREEN_WIDTH + x];
                     if (n < 0) continue;
                     int k = (int)n;
                     if (style == Banded)

@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <math.h>
+#include <defines.h>
 
 using namespace std;
 
@@ -12,10 +13,10 @@ class Mandelbrot
     public:
         Mandelbrot();
         void Update(double *vals) const;
-        int iter = 150;
-        long double zoom = 0.004;
-        long double offx = 0, offy = 0;
-        int width = 1200, height = 900;
+        int iter = INIT_ITER;
+        long double zoom = 0.004L;
+        long double offx = 0L, offy = 0L;
+        int width = INIT_SCREEN_WIDTH, height = INIT_SCREEN_HEIGHT;
     protected:
     private:
         void Slice(double* vals, int minY, int maxY) const;
