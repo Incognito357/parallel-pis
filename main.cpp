@@ -46,6 +46,7 @@ int SendText(int s, char* msg)
 int main()
 {
     Message m;
+    memset(&m, 0, sizeof(m));
     int sock;
 
     #ifdef MASTER
@@ -351,7 +352,7 @@ int main()
 
         if (ret > 0)
         {
-            printf("Received header type %d size %d", m.type, ret);
+            printf("Received header type %d size %d\n", m.type, ret);
             switch (m.type)
             {
                 case MessageType::Recalc:
