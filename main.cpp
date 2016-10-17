@@ -115,7 +115,7 @@ int main()
     }
 
     struct addrinfo *i;
-    for (int r = 0; r < RETRYATTEMPTS; r++)
+    for (int r = 0; r <= RETRYATTEMPTS; r++)
     {
         for (i = serv; i != NULL; i = i->ai_next)
         {
@@ -135,15 +135,17 @@ int main()
             break;  //successful connection, don't try to connect to more
         }
 
-        if (i == NULL) printf("Retrying, attempt %d of %d", r, RETRYATTEMPTS);
+        if (i == NULL)
+        {
+            sleep(5);
+            printf("Retrying, attempt %d of %d\n", r + 1, RETRYATTEMPTS);
+        }
         else if (i == NULL && r == RETRYATTEMPTS - 1)
         {
             printf("Could not connect.\n");
             return -1;
         }
         else break; //successful connection
-
-        sleep(1);
     }
 
     char s[INET_ADDRSTRLEN];
