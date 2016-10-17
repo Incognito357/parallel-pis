@@ -317,7 +317,7 @@ int main()
                             char* buf = new char[m.size];
                             read(s, &buf, m.size);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                            SendText(s, "Received message");
+                            //SendText(s, "Received message");
                             break;
                     }
                 }
@@ -370,7 +370,7 @@ int main()
                     int ret = read(sock, &buf, m.size);
                     printf("Text event, expected buf size: %d, received: %d\n", m.size, ret);
                     printf("-> Server: \"%s\"\n", buf);
-                    SendText(sock, "Received greeting");
+                    SendText(sock, "Received message");
                     break;
             }
         }
