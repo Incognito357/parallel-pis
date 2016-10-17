@@ -321,12 +321,12 @@ int main()
 
                             break;
                         case MessageType::Text:
+                            printf("Expecting string of length: %d\n", m.len);
                             char* buf = new char[m.len + 1];
                             int ret = read(s, &buf, m.len);
                             buf[m.len] = 0;
-                            printf("Text event, expected buf size: %d, received: %d\n", m.len, ret);
+                            printf("Received %d\n", ret);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                            //SendText(s, "Received message");
                             break;
                     }
                 }
@@ -381,10 +381,11 @@ int main()
 
                     break;
                 case MessageType::Text:
-                    printf("Expecting string of length: %d", m.len);
+                    printf("Expecting string of length: %d\n", m.len);
                     char* buf = new char[m.len + 1];
                     ret = read(sock, &buf, m.len);
                     buf[m.len] = 0;
+                    printf("Received %d\n", ret);
                     printf("-> Server: \"%s\"\n", buf);
                     char *test = "Received message";
                     SendText(sock, test);
