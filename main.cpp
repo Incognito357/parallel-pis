@@ -373,7 +373,8 @@ int main()
                     buf[m.len] = 0;
                     printf("Text event, expected buf size: %d, received: %d\n", m.len, ret);
                     printf("-> Server: \"%s\"\n", buf);
-                    SendText(sock, "Received message");
+                    char *test = "Received message";
+                    SendText(sock, test);
                     break;
             }
         }
