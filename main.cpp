@@ -317,8 +317,11 @@ int main()
 
         #ifndef CLIENT
 
-        buf[ret] = 0;
-        printf("Server: \"%s\"\n", buf);
+        if (ret > 0)
+        {
+            buf[ret] = 0;
+            printf("Server: \"%s\"\n", buf);
+        }
 
         #endif
         #endif
