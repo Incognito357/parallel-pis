@@ -36,7 +36,11 @@ int SendText(int s, char* msg)
     reply.len = (int)strlen(msg);
     printf("Sending header: %d\n", (int)sizeof(reply));
     printf("Sending msg: %d\n", reply.len);
-    return send(s, &reply, sizeof(reply), 0) + send(s, &msg, reply.len, 0);
+    int s1 = send(s, &reply, sizeof(reply), 0);
+    if (s1 <= 0) return -1;
+    int s2 = send(s, &msg, reply.len, 0);
+    if (s2 <= 0) return -1;
+    return s1 + s2;
 }
 
 int main()
@@ -328,7 +332,7 @@ int main()
 
         #else
 
-        printf("test\n");
+        printf("sizeof m: %d\n", (int)sizeof(m));
         ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
         if (ret == 0)
         {
