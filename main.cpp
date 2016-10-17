@@ -248,6 +248,7 @@ int main()
             Message reply;
             reply.type = Text;
             reply.size = strlen(msg);
+            printf("Sending %s %d bytes\n", inet_ntoa(addr.sin_addr), reply.size);
             int suc = send(newsock, &reply, sizeof(Message), 0) + send(newsock, &msg, reply.size, 0);
             if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
@@ -364,9 +365,9 @@ int main()
 
                     break;
                 case MessageType::Text:
-                    char* buf = new char[(int)m.size];
+                    char* buf = new char[m.size];
                     int ret = read(sock, &buf, m.size);
-                    printf("Text event, expected buf size: %d, received: %d", (int)m.size, ret);
+                    printf("Text event, expected buf size: %d, received: %d", m.size, ret);
                     printf("-> Server: \"%s\"\n", buf);
                     break;
             }

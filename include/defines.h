@@ -13,7 +13,7 @@ enum MessageType {
 
 struct Message {
     MessageType type;
-    size_t size;
+    int size;
 };
 
 #ifdef CLIENT
