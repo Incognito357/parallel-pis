@@ -315,8 +315,9 @@ int main()
                             break;
                         case MessageType::Text:
                             char* buf = new char[m.len + 1];
-                            read(s, &buf, m.len);
+                            int ret = read(s, &buf, m.len);
                             buf[m.len] = 0;
+                            printf("Text event, expected buf size: %d, received: %d\n", m.len, ret);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             //SendText(s, "Received message");
                             break;
