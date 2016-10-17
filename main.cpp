@@ -322,7 +322,8 @@ int main()
                             break;
                         case MessageType::Text:
                             printf("Expecting string of length: %d\n", m.len);
-                            char* buf = new char[m.len + 1];
+                            char* buf;
+                            memset(&buf, 0, m.len + 1);
                             int ret = read(s, &buf, m.len);
                             buf[m.len] = 0;
                             printf("Received %d\n", ret);
@@ -382,7 +383,8 @@ int main()
                     break;
                 case MessageType::Text:
                     printf("Expecting string of length: %d\n", m.len);
-                    char* buf = new char[m.len + 1];
+                    char* buf;
+                    memset(&buf, 0, m.len + 1);
                     ret = read(sock, &buf, m.len);
                     buf[m.len] = 0;
                     printf("Received %d\n", ret);
