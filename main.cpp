@@ -370,6 +370,7 @@ int main()
                     int ret = read(sock, &buf, m.size);
                     printf("Text event, expected buf size: %d, received: %d\n", m.size, ret);
                     printf("-> Server: \"%s\"\n", buf);
+                    SendText(sock, "Received greeting");
                     break;
             }
         }
