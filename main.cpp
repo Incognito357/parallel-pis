@@ -328,6 +328,7 @@ int main()
 
         #else
 
+        printf("test\n");
         ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
         if (ret == 0)
         {
