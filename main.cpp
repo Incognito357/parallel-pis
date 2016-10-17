@@ -33,10 +33,10 @@ int SendText(int s, char* msg)
 {
     Message reply;
     reply.type = Text;
-    reply.size = strlen(msg);
+    reply.len = strlen(msg);
     printf("Sending header: %d\n", (int)sizeof(reply));
-    printf("Sending msg: %d\n", reply.size);
-    return send(s, &reply, sizeof(reply), 0) + send(s, &msg, reply.size, 0);
+    printf("Sending msg: %d\n", reply.len);
+    return send(s, &reply, sizeof(reply), 0) + send(s, &msg, reply.len, 0);
 }
 
 int main()
@@ -314,8 +314,8 @@ int main()
 
                             break;
                         case MessageType::Text:
-                            char* buf = new char[m.size];
-                            read(s, &buf, m.size);
+                            char* buf = new char[m.len];
+                            read(s, &buf, m.len);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             //SendText(s, "Received message");
                             break;
@@ -366,9 +366,9 @@ int main()
 
                     break;
                 case MessageType::Text:
-                    char* buf = new char[m.size];
-                    int ret = read(sock, &buf, m.size);
-                    printf("Text event, expected buf size: %d, received: %d\n", m.size, ret);
+                    char* buf = new char[m.len];
+                    int ret = read(sock, &buf, m.len);
+                    printf("Text event, expected buf size: %d, received: %d\n", m.len, ret);
                     printf("-> Server: \"%s\"\n", buf);
                     SendText(sock, "Received message");
                     break;
