@@ -29,6 +29,16 @@ double scale(double v, double vl, double vh, double nl, double nh)
 
 using namespace std;
 
+int SendText(int s, char* msg)
+{
+    Message reply;
+    reply.type = Text;
+    reply.size = strlen(msg);
+    printf("Sending header: %d\n", (int)sizeof(reply));
+    printf("Sending msg: %d\n", reply.size);
+    return send(s, &reply, sizeof(reply), 0) + send(s, &msg, reply.size, 0);
+}
+
 int main()
 {
     Message m;
@@ -125,9 +135,9 @@ int main()
         else break; //successful connection
     }
 
-    char s[INET_ADDRSTRLEN];
-    inet_ntop(i->ai_family, &((struct sockaddr_in*)((struct sockaddr*)i->ai_addr))->sin_addr, s, sizeof(s));
-    printf("Connecting to %s\n", s);
+    char saddr[INET_ADDRSTRLEN];
+    inet_ntop(i->ai_family, &((struct sockaddr_in*)((struct sockaddr*)i->ai_addr))->sin_addr, saddr, sizeof(saddr));
+    printf("Connecting to %s\n", saddr);
 
     freeaddrinfo(serv);
 
@@ -245,12 +255,7 @@ int main()
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
             char* msg = "You have just connected to Master Pi!\0";
-            Message reply;
-            reply.type = Text;
-            reply.size = strlen(msg);
-            printf("Sending %s %d bytes\n", inet_ntoa(addr.sin_addr), reply.size);
-            int suc = send(newsock, &reply, sizeof(m), 0) + send(newsock, &msg, reply.size, 0);
-            if (suc != sizeof(Message) + reply.size) printf("Could not send message\n");
+            if (SendText(newsock, "You have just connected to Master Pi!") <= 0) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
@@ -312,12 +317,7 @@ int main()
                             char* buf = new char[m.size];
                             read(s, &buf, m.size);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
-                            char* msg = "Received message\0";
-                            Message reply;
-                            reply.type = Text;
-                            reply.size = strlen(msg);
-                            send(s, &reply, sizeof(reply), 0);
-                            send(s, &msg, reply.size, 0);
+                            SendText(s, "Received message");
                             break;
                     }
                 }
@@ -335,6 +335,7 @@ int main()
 
         if (ret > 0)
         {
+            printf("Received header %d size %d", m.type, ret);
             switch (m.type)
             {
                 case MessageType::Recalc:
