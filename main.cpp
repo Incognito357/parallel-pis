@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <defines.h>
 
 #define MAXBUF 1024
 
@@ -17,7 +18,6 @@
 #include <SDL2/SDL_ttf.h>
 #include <unordered_map>
 
-#include <defines.h>
 #include <vector>
 #include <sstream>
 #include <iomanip>
@@ -135,12 +135,12 @@ int main()
             break;  //successful connection, don't try to connect to more
         }
 
-        if (i == NULL)
+        if (i == NULL && r < RETRYATTEMPTS)
         {
             sleep(5);
             printf("Retrying, attempt %d of %d\n", r + 1, RETRYATTEMPTS);
         }
-        else if (i == NULL && r == RETRYATTEMPTS - 1)
+        else if (i == NULL && r == RETRYATTEMPTS)
         {
             printf("Could not connect.\n");
             return -1;
@@ -308,16 +308,19 @@ int main()
 
         #else
 
-        ret = recv(sock, buf, MAXBUF, 0);
+        ret = recv(sock, buf, MAXBUF, MSG_DONTWAIT);
         if (ret == 0)
         {
             printf("Server closed connection\n");
             break;
         }
 
+        #ifndef CLIENT
+
         buf[ret] = 0;
         printf("Server: \"%s\"\n", buf);
 
+        #endif
         #endif
 
         #ifdef CLIENT

@@ -6,4 +6,8 @@
 #define MAX_ITER 5000
 #define INIT_ITER 150
 
+enum Message {
+
+};
+
 #endif
