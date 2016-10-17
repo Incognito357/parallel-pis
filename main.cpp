@@ -258,7 +258,7 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char *test = "ab";
+            char *test = "abc";
             if (SendText(newsock, test) <= 0) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
