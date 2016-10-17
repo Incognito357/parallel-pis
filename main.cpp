@@ -38,7 +38,7 @@ int SendText(int s, char* msg)
     printf("Sending msg: %d\n", reply.len);
     int s1 = send(s, &reply, sizeof(reply), 0);
     if (s1 != sizeof(reply)) return -1;
-    int s2 = send(s, &msg, reply.len, 0);
+    int s2 = send(s, msg, reply.len, 0);
     if (s2 != reply.len) return -2;
     return s1 + s2;
 }
