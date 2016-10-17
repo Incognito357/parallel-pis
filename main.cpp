@@ -333,7 +333,9 @@ int main()
         #else
 
         printf("sizeof m: %d\n", (int)sizeof(m));
-        ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
+        char tempbuf[4096];
+        //ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
+        ret = recv(sock, &tempbuf, 4095, MSG_DONTWAIT);
         if (ret == 0)
         {
             printf("Server closed connection\n");
