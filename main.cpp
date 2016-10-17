@@ -332,7 +332,7 @@ int main()
 
         #else
 
-        printf("sizeof m: %d\n", (int)sizeof(m));
+        //printf("sizeof m: %d\n", (int)sizeof(m));
         char tempbuf[4096];
         //ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
         ret = recv(sock, &tempbuf, 4095, MSG_DONTWAIT);
