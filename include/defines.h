@@ -11,7 +11,7 @@ enum MessageType {
     Recalc, OffX, OffY, Zoom, Iter, Vals, ResX, ResY, Connections, Text
 };
 
-struct Message {
+struct __attribute__ ((__packed__)) Message {
     MessageType type;
     int len;
 };
