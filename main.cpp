@@ -323,7 +323,7 @@ int main()
                         case MessageType::Text:
                             printf("Expecting string of length: %d\n", m.len);
                             char* buf = new char[m.len + 1]();
-                            int ret = read(s, &buf, m.len);
+                            int ret = read(s, buf, m.len);
                             buf[m.len] = 0;
                             printf("Received %d\n", ret);
                             printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
@@ -383,7 +383,7 @@ int main()
                 case MessageType::Text:
                     printf("Expecting string of length: %d\n", m.len);
                     char* buf = new char[m.len + 1]();
-                    ret = read(sock, &buf, m.len);
+                    ret = read(sock, buf, m.len);
                     buf[m.len] = 0;
                     printf("Received %d\n", ret);
                     printf("-> Server: \"%s\"\n", buf);
