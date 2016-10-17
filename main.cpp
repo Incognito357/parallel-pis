@@ -29,7 +29,7 @@ double scale(double v, double vl, double vh, double nl, double nh)
 
 using namespace std;
 
-int SendText(int s, const char* msg)
+int SendText(int s, char* msg)
 {
     Message reply;
     reply.type = Text;
@@ -254,7 +254,8 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            if (SendText(newsock, "You have just connected to Master Pi!") <= 0) printf("Could not send message\n");
+            char *test = "You have just connected to Master Pi!";
+            if (SendText(newsock, test) <= 0) printf("Could not send message\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
