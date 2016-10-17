@@ -338,6 +338,11 @@ int main()
         char tempbuf[4096];
         //ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
         ret = recv(sock, &tempbuf, 4095, MSG_DONTWAIT);
+
+        if (ret < 0)
+        {
+            printf("Err: %d", errno);
+        }
         if (ret == 0)
         {
             printf("Server closed connection\n");
