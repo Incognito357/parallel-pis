@@ -259,7 +259,7 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char *test = "ab";
+            char *test = "You have connected to the Master Pi!";
             int ret = SendText(newsock, test);
             if (ret == -1) printf("Could not send header\n");
             else if (ret == -2) printf("Could not send text\n");
@@ -322,8 +322,7 @@ int main()
                             break;
                         case MessageType::Text:
                             printf("Expecting string of length: %d\n", m.len);
-                            char* buf = new char[m.len + 1];
-                            memset(&buf, 0, m.len + 1);
+                            char* buf = new char[m.len + 1]();
                             int ret = read(s, &buf, m.len);
                             buf[m.len] = 0;
                             printf("Received %d\n", ret);
@@ -383,8 +382,7 @@ int main()
                     break;
                 case MessageType::Text:
                     printf("Expecting string of length: %d\n", m.len);
-                    char* buf = new char[m.len + 1];
-                    memset(&buf, 0, m.len + 1);
+                    char* buf = new char[m.len + 1]();
                     ret = read(sock, &buf, m.len);
                     buf[m.len] = 0;
                     printf("Received %d\n", ret);
