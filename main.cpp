@@ -39,7 +39,7 @@ int SendText(int s, char* msg)
     int s1 = send(s, &reply, sizeof(reply), 0);
     if (s1 != sizeof(reply)) return -1;
     int s2 = send(s, &msg, reply.len, 0);
-    if (s2 != reply.len) return -1;
+    if (s2 != reply.len) return -2;
     return s1 + s2;
 }
 
@@ -259,7 +259,9 @@ int main()
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
             char *test = "abc";
-            if (SendText(newsock, test) <= 0) printf("Could not send message\n");
+            int ret = SendText(newsock, test);
+            if (ret == -1) printf("Could not send header\n");
+            else if (ret == -2) printf("Could not send text\n");
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
