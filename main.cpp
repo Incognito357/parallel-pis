@@ -362,7 +362,7 @@ int main()
                     break;
                 case MessageType::Text:
                     char* buf = new char[m.size];
-                    read(s, &buf, m.size);
+                    read(sock, &buf, m.size);
                     printf("-> Server: \"%s\"\n", buf);
                     break;
             }
