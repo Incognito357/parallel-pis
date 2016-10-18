@@ -259,7 +259,6 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            //char *test = "You have connected to the Master Pi!";
             if (SendText(newsock, "You have connected to the Master Pi!") < 0)
                 printf("Could not greet %s\n", inet_ntoa(addr.sin_addr));
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
@@ -324,7 +323,6 @@ int main()
                             char* buf = new char[m.len + 1]();
                             int ret = read(s, buf, m.len);
                             buf[m.len] = 0;
-                            //printf("Received %d\n", ret);
                             printf("%s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             break;
                     }
@@ -334,7 +332,7 @@ int main()
 
         #else
 
-        ret = recv(sock, &m, sizeof(m), NULL);
+        ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
 
         if (ret < 0)
         {
@@ -384,7 +382,6 @@ int main()
                     buf[m.len] = 0;
                     //printf("Received %d\n", ret);
                     printf("Server: \"%s\"\n", buf);
-                    //char *test = "Received message";
                     SendText(sock, "Received message from server");
                     break;
             }
