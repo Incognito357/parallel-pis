@@ -336,12 +336,14 @@ int main()
 
                             break;
                         case MessageType::Vals:
+                        {
                             int cur;
-                            ret = read(s, &cur, sizeof(cur));
+                            int ret = read(s, &cur, sizeof(cur));
                             double *buf = new double[m.len];
                             ret = read(s, buf, m.len);
 
                             break;
+                        }
                         case MessageType::Text:
                             //printf("Expecting string of length: %d\n", m.len);
                             char* buf = new char[m.len + 1]();
