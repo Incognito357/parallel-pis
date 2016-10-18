@@ -48,6 +48,7 @@ int main()
     Message m;
     memset(&m, 0, sizeof(m));
     int sock;
+    int numclients = 0;
 
     #ifdef MASTER
 
@@ -224,8 +225,15 @@ int main()
     bool recalc = true;
     bool changeBack = false;
     bool hideVals = false;
-    long double loffx = 0, loffy = 0;
+    long double loffx = 0L, loffy = 0L;
+    long double curzoom = INIT_ZOOM;
+    long double curoffx = 0L, curoffy = 0L;
+    int resx = INIT_SCREEN_WIDTH, resy = INIT_SCREEN_HEIGHT;
     SDL_Event e;
+
+    #elif !defined(MASTER)
+
+    Mandelbrot mandl;
 
     #endif
 
@@ -269,6 +277,7 @@ int main()
                 {
                     clients[i] = newsock;
                     printf("Client %d added to list\n", i);
+                    numclients++;
                     break;
                 }
             }
@@ -286,14 +295,21 @@ int main()
                     printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
+                    numclients--;
                 }
                 else
                 {
                     switch (m.type)
                     {
                         case MessageType::Recalc:
-
+                        {
+                            for (j = 0; j < MAXCLIENTS; j++)
+                            {
+                                if (j == i || clients[j] == 0)) continue;
+                                send(clients[j], &m, sizeof(m));
+                            }
                             break;
+                        }
                         case MessageType::OffX:
 
                             break;
@@ -345,31 +361,73 @@ int main()
             switch (m.type)
             {
                 case MessageType::Recalc:
+                {
+                    #ifdef CLIENT
 
+                    #else
+                    double *vals = new double[(mandl.width * mandl.height) / numclients];
+                    mandl.Update(vals);
+
+
+                    delete[] vals;
+                    #endif
                     break;
+                }
                 case MessageType::OffX:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.offx, sizeof(long double));
+                    #endif
                     break;
                 case MessageType::OffY:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.offy, sizeof(long double));
+                    #endif
                     break;
                 case MessageType::Iter:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.iter, sizeof(int));
+                    #endif
                     break;
                 case MessageType::Zoom:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.zoom, sizeof(long double));
+                    #endif
                     break;
                 case MessageType::Connections:
+                    #ifdef CLIENT
 
+                    #else
+
+                    #endif
                     break;
                 case MessageType::ResX:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.width, sizeof(int));
+                    #endif
                     break;
                 case MessageType::ResY:
+                    #ifdef CLIENT
 
+                    #else
+                    ret = read(sock, &mandl.height, sizeof(int));
+                    #endif
                     break;
                 case MessageType::Vals:
+                    #ifdef CLIENT
 
+                    #else
+
+                    #endif
                     break;
                 case MessageType::Text:
                     //printf("Expecting string of length: %d\n", m.len);

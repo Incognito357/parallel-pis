@@ -4,6 +4,7 @@
 #define INIT_SCREEN_WIDTH 1200
 #define INIT_SCREEN_HEIGHT 900
 #define INIT_ITER 150
+#define INIT_ZOOM 0.004L
 #define MAX_ITER 5000
 #define MAXBUF
 
