@@ -334,11 +334,7 @@ int main()
 
         ret = recv(sock, &m, sizeof(m), MSG_DONTWAIT);
 
-        if (ret < 0)
-        {
-            printf("Err: %d\n", errno);
-        }
-        else if (ret == 0)
+        if (ret == 0)
         {
             printf("Server closed connection\n");
             break;
