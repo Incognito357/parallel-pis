@@ -340,6 +340,7 @@ int main()
                                 if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
                                 m.len = cl;
                                 send(clients[j], &m, sizeof(m), 0);
+                                printf("Client %d is rendering %d", j, cl);
                                 cl++;
                             }
                             break;
