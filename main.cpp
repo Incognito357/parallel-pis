@@ -34,8 +34,8 @@ int SendText(int s, char* msg)
     Message reply;
     reply.type = Text;
     reply.len = (int)strlen(msg);
-    printf("Sending header: %d\n", (int)sizeof(reply));
-    printf("Sending msg: %d\n", reply.len);
+    //printf("Sending header: %d\n", (int)sizeof(reply));
+    //printf("Sending msg: %d\n", reply.len);
     int s1 = send(s, &reply, sizeof(reply), 0);
     if (s1 != sizeof(reply)) return -1;
     int s2 = send(s, msg, reply.len, 0);
@@ -259,10 +259,9 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-            char *test = "You have connected to the Master Pi!";
-            int ret = SendText(newsock, test);
-            if (ret == -1) printf("Could not send header\n");
-            else if (ret == -2) printf("Could not send text\n");
+            //char *test = "You have connected to the Master Pi!";
+            if (SendText(newsock, "You have connected to the Master Pi!") < 0)
+                printf("Could not greet %s\n", inet_ntoa(addr.sin_addr));
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
 
             for (int i = 0; i < MAXCLIENTS; i++)
@@ -285,7 +284,7 @@ int main()
                 getpeername(s, (struct sockaddr*)&addr, (socklen_t*)&addrlen);
                 if (val == 0)
                 {
-                    printf("Client %s disconnected\n", inet_ntoa(addr.sin_addr));
+                    printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
                 }
@@ -321,12 +320,12 @@ int main()
 
                             break;
                         case MessageType::Text:
-                            printf("Expecting string of length: %d\n", m.len);
+                            //printf("Expecting string of length: %d\n", m.len);
                             char* buf = new char[m.len + 1]();
                             int ret = read(s, buf, m.len);
                             buf[m.len] = 0;
-                            printf("Received %d\n", ret);
-                            printf("-> %s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
+                            //printf("Received %d\n", ret);
+                            printf("%s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             break;
                     }
                 }
@@ -335,22 +334,20 @@ int main()
 
         #else
 
-        //printf("sizeof m: %d\n", (int)sizeof(m));
         ret = recv(sock, &m, sizeof(m), NULL);
 
         if (ret < 0)
         {
-            printf("Err: %d", errno);
+            printf("Err: %d\n", errno);
         }
-        if (ret == 0)
+        else if (ret == 0)
         {
             printf("Server closed connection\n");
             break;
         }
-
-        if (ret > 0)
+        else if (ret > 0)
         {
-            printf("Received header type %d size %d\n", m.type, ret);
+            //printf("Received header type %d size %d\n", m.type, ret);
             switch (m.type)
             {
                 case MessageType::Recalc:
@@ -381,14 +378,14 @@ int main()
 
                     break;
                 case MessageType::Text:
-                    printf("Expecting string of length: %d\n", m.len);
+                    //printf("Expecting string of length: %d\n", m.len);
                     char* buf = new char[m.len + 1]();
                     ret = read(sock, buf, m.len);
                     buf[m.len] = 0;
-                    printf("Received %d\n", ret);
-                    printf("-> Server: \"%s\"\n", buf);
-                    char *test = "Received message";
-                    SendText(sock, test);
+                    //printf("Received %d\n", ret);
+                    printf("Server: \"%s\"\n", buf);
+                    //char *test = "Received message";
+                    SendText(sock, "Received message from server");
                     break;
             }
         }
