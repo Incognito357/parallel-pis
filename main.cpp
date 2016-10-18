@@ -335,12 +335,11 @@ int main()
                         {
                             printf("Begin rendering...\n");
                             int cl = 0;
-                            m.len = sizeof(cl);
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
                                 if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
+                                m.len = cl;
                                 send(clients[j], &m, sizeof(m), 0);
-                                send(clients[j], &cl, sizeof(cl), 0);
                                 cl++;
                             }
                             break;
@@ -370,6 +369,7 @@ int main()
                         {
                             int cur;
                             read(s, &cur, sizeof(cur));
+                            printf("Relaying vals from %d\n", cur);
                             double *buf = new double[m.len];
                             read(s, buf, m.len);
                             for (int j = 0; j < MAXCLIENTS; j++)
@@ -414,15 +414,18 @@ int main()
                     #ifdef CLIENT
 
                     #else
-                    read(sock, &mandl.parallel_pos, m.len);
+                    mandl.parallel_pos = m.len;
+                    printf("Rendering with pos %d...", mandl.parallel_pos);
                     double *vals = new double[mandl.width * mandl.height];
                     mandl.Update(vals);
+                    printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
                     smsg.len = (mandl.width * mandl.height) * sizeof(long double);
                     send(sock, &smsg, sizeof(smsg), 0);
                     send(sock, &mandl.parallel_pos, m.len, 0);
                     send(sock, vals, smsg.len, 0);
+                    printf("Sent values to server\n");
                     delete[] vals;
                     #endif
                     break;
@@ -480,10 +483,15 @@ int main()
                     double* buf = new double[m.len]();
                     int pos;
                     read(sock, &pos, sizeof(pos));
+                    printf("Received values from pos %d\n", pos);
                     read(sock, buf, m.len);
                     memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
                     valsreceived++;
-                    if (valsreceived >= numclients) redraw = true;
+                    if (valsreceived >= numclients)
+                    {
+                        printf("All values received, rendering...\n");
+                        redraw = true;
+                    }
                     #else
 
                     #endif
