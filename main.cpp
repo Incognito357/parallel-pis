@@ -278,7 +278,7 @@ int main()
 
             char cltype;
             read(newsock, &cltype, sizeof(cltype));
-            printf("Client is type: %c", cltype);
+            printf("Client is type: %d\n", cltype);
 
             if (SendText(newsock, "You have connected to the Master Pi!") < 0)
                 printf("Could not greet %s\n", inet_ntoa(addr.sin_addr));
@@ -290,8 +290,16 @@ int main()
                 {
                     clients[i] = newsock;
                     printf("Client %d added to list\n", i);
-                    numclients++;
+                    if (cltype == 1) numclients++;
                     cltypes[i] = cltype;
+                    for (int j = 0; j < MAXCLIENTS; j++)
+                    {
+                        if (clients[j] == 0) continue;
+                        m.type = Connections;
+                        m.len = numclients;
+                        send(clients[j], &m, sizeof(m), 0);
+                    }
+
                     break;
                 }
             }
@@ -309,8 +317,15 @@ int main()
                     printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
+                    if (cltypes[i] == 1) numclients--;
                     cltypes[i] = 0;
-                    numclients--;
+                    for (int j = 0; j < MAXCLIENTS; j++)
+                    {
+                        if (clients[j] == 0) continue;
+                        m.type = Connections;
+                        m.len = numclients;
+                        send(clients[j], &m, sizeof(m), 0);
+                    }
                 }
                 else
                 {
@@ -318,6 +333,7 @@ int main()
                     {
                         case MessageType::Recalc:
                         {
+                            printf("Begin rendering...\n");
                             int cl = 0;
                             m.len = sizeof(cl);
                             for (int j = 0; j < MAXCLIENTS; j++)
@@ -440,7 +456,8 @@ int main()
                     #endif
                     break;
                 case MessageType::Connections:
-                    read(sock, &numclients, m.len);
+                    numclients = m.len;
+                    printf("Number of clients is now: %d\n", numclients);
                     break;
                 case MessageType::ResX:
                     #ifdef CLIENT
