@@ -14,6 +14,7 @@ class Mandelbrot
         Mandelbrot();
         void Update(double *vals) const;
         int iter = INIT_ITER;
+        int parallel_pos = 0;
         long double zoom = 0.004L;
         long double offx = 0L, offy = 0L;
         int width = INIT_SCREEN_WIDTH, height = INIT_SCREEN_HEIGHT;

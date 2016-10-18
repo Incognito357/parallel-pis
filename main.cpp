@@ -303,10 +303,14 @@ int main()
                     {
                         case MessageType::Recalc:
                         {
-                            for (j = 0; j < MAXCLIENTS; j++)
+                            int cl = 0;
+                            m.len = sizeof(cl);
+                            for (int j = 0; j < MAXCLIENTS; j++)
                             {
-                                if (j == i || clients[j] == 0)) continue;
-                                send(clients[j], &m, sizeof(m));
+                                if (j == i || clients[j] == 0) continue;
+                                send(clients[j], &m, sizeof(m), 0);
+                                send(clients[j], &cl, sizeof(cl), 0);
+                                cl++;
                             }
                             break;
                         }
@@ -332,6 +336,10 @@ int main()
 
                             break;
                         case MessageType::Vals:
+                            int cur;
+                            ret = read(s, &cur, sizeof(cur));
+                            double *buf = new double[m.len];
+                            ret = read(s, buf, m.len);
 
                             break;
                         case MessageType::Text:
@@ -340,6 +348,7 @@ int main()
                             int ret = read(s, buf, m.len);
                             buf[m.len] = 0;
                             printf("%s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
+                            delete[] buf;
                             break;
                     }
                 }
@@ -365,10 +374,15 @@ int main()
                     #ifdef CLIENT
 
                     #else
-                    double *vals = new double[(mandl.width * mandl.height) / numclients];
+                    ret = read(sock, &mandl.parallel_pos, m.len);
+                    double *vals = new double[mandl.width * mandl.height];
                     mandl.Update(vals);
-
-
+                    Message smsg;
+                    smsg.type = Vals;
+                    smsg.len = (mandl.width * mandl.height) * sizeof(long double);
+                    send(sock, &smsg, sizeof(smsg), 0);
+                    send(sock, &mandl.parallel_pos, m.len);
+                    send(sock, vals, smsg.len, 0);
                     delete[] vals;
                     #endif
                     break;
@@ -377,54 +391,52 @@ int main()
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.offx, sizeof(long double));
+                    ret = read(sock, &mandl.offx, m.len);
                     #endif
                     break;
                 case MessageType::OffY:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.offy, sizeof(long double));
+                    ret = read(sock, &mandl.offy, m.len);
                     #endif
                     break;
                 case MessageType::Iter:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.iter, sizeof(int));
+                    ret = read(sock, &mandl.iter, m.len);
                     #endif
                     break;
                 case MessageType::Zoom:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.zoom, sizeof(long double));
+                    ret = read(sock, &mandl.zoom, m.len);
                     #endif
                     break;
                 case MessageType::Connections:
-                    #ifdef CLIENT
-
-                    #else
-
-                    #endif
+                    ret = read(sock, &numclients, m.len);
                     break;
                 case MessageType::ResX:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.width, sizeof(int));
+                    ret = read(sock, &mandl.width, m.len);
                     #endif
                     break;
                 case MessageType::ResY:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.height, sizeof(int));
+                    ret = read(sock, &mandl.height, m.len);
+                    mandl.height /= numclients;
                     #endif
                     break;
                 case MessageType::Vals:
                     #ifdef CLIENT
-
+                    ret = read(sock, vals, m.len);
+                    redraw = true;
                     #else
 
                     #endif
@@ -436,6 +448,7 @@ int main()
                     buf[m.len] = 0;
                     //printf("Received %d\n", ret);
                     printf("Server: \"%s\"\n", buf);
+                    delete[] buf;
                     SendText(sock, "Received message from server");
                     break;
             }
