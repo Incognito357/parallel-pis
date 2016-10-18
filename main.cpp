@@ -54,6 +54,7 @@ int main()
 
     struct sockaddr_in addr;
     int clients[MAXCLIENTS];
+    char cltypes[MAXCLIENTS];
     fd_set fds;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
@@ -145,6 +146,13 @@ int main()
     inet_ntop(i->ai_family, &((struct sockaddr_in*)((struct sockaddr*)i->ai_addr))->sin_addr, saddr, sizeof(saddr));
     printf("Connecting to %s\n", saddr);
 
+    #ifdef CLIENT
+    char cltype = 2;
+    #else
+    char cltype = 1;
+    #endif
+    send(sock, &cltype, sizeof(cltype), 0);
+
     freeaddrinfo(serv);
 
     #endif
@@ -229,6 +237,7 @@ int main()
     long double curzoom = INIT_ZOOM;
     long double curoffx = 0L, curoffy = 0L;
     int resx = INIT_SCREEN_WIDTH, resy = INIT_SCREEN_HEIGHT;
+    int valsreceived = 0;
     SDL_Event e;
 
     #elif !defined(MASTER)
@@ -267,6 +276,10 @@ int main()
 
             printf("New connection from %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
+            char cltype;
+            read(newsock, &cltype, sizeof(cltype));
+            printf("Client is type: %c", cltype);
+
             if (SendText(newsock, "You have connected to the Master Pi!") < 0)
                 printf("Could not greet %s\n", inet_ntoa(addr.sin_addr));
             else printf("Greeted %s\n", inet_ntoa(addr.sin_addr));
@@ -278,6 +291,7 @@ int main()
                     clients[i] = newsock;
                     printf("Client %d added to list\n", i);
                     numclients++;
+                    cltypes[i] = cltype;
                     break;
                 }
             }
@@ -295,6 +309,7 @@ int main()
                     printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
+                    cltypes[i] = 0;
                     numclients--;
                 }
                 else
@@ -307,7 +322,7 @@ int main()
                             m.len = sizeof(cl);
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
-                                if (j == i || clients[j] == 0) continue;
+                                if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
                                 send(clients[j], &m, sizeof(m), 0);
                                 send(clients[j], &cl, sizeof(cl), 0);
                                 cl++;
@@ -338,16 +353,23 @@ int main()
                         case MessageType::Vals:
                         {
                             int cur;
-                            int ret = read(s, &cur, sizeof(cur));
+                            read(s, &cur, sizeof(cur));
                             double *buf = new double[m.len];
-                            ret = read(s, buf, m.len);
-
+                            read(s, buf, m.len);
+                            for (int j = 0; j < MAXCLIENTS; j++)
+                            {
+                                if (j == i || clients[j] == 0 || cltypes[j] != 2) continue;
+                                send(clients[j], &m, sizeof(m), 0);
+                                send(clients[j], &cur, sizeof(cur), 0);
+                                send(clients[j], buf, m.len, 0);
+                            }
+                            delete[] buf;
                             break;
                         }
                         case MessageType::Text:
                             //printf("Expecting string of length: %d\n", m.len);
                             char* buf = new char[m.len + 1]();
-                            int ret = read(s, buf, m.len);
+                            read(s, buf, m.len);
                             buf[m.len] = 0;
                             printf("%s: \"%s\"\n", inet_ntoa(addr.sin_addr), buf);
                             delete[] buf;
@@ -376,14 +398,14 @@ int main()
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.parallel_pos, m.len);
+                    read(sock, &mandl.parallel_pos, m.len);
                     double *vals = new double[mandl.width * mandl.height];
                     mandl.Update(vals);
                     Message smsg;
                     smsg.type = Vals;
                     smsg.len = (mandl.width * mandl.height) * sizeof(long double);
                     send(sock, &smsg, sizeof(smsg), 0);
-                    send(sock, &mandl.parallel_pos, m.len);
+                    send(sock, &mandl.parallel_pos, m.len, 0);
                     send(sock, vals, smsg.len, 0);
                     delete[] vals;
                     #endif
@@ -393,60 +415,67 @@ int main()
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.offx, m.len);
+                    read(sock, &mandl.offx, m.len);
                     #endif
                     break;
                 case MessageType::OffY:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.offy, m.len);
+                    read(sock, &mandl.offy, m.len);
                     #endif
                     break;
                 case MessageType::Iter:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.iter, m.len);
+                    read(sock, &mandl.iter, m.len);
                     #endif
                     break;
                 case MessageType::Zoom:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.zoom, m.len);
+                    read(sock, &mandl.zoom, m.len);
                     #endif
                     break;
                 case MessageType::Connections:
-                    ret = read(sock, &numclients, m.len);
+                    read(sock, &numclients, m.len);
                     break;
                 case MessageType::ResX:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.width, m.len);
+                    read(sock, &mandl.width, m.len);
                     #endif
                     break;
                 case MessageType::ResY:
                     #ifdef CLIENT
 
                     #else
-                    ret = read(sock, &mandl.height, m.len);
+                    read(sock, &mandl.height, m.len);
                     mandl.height /= numclients;
                     #endif
                     break;
                 case MessageType::Vals:
+                {
                     #ifdef CLIENT
-                    ret = read(sock, vals, m.len);
-                    redraw = true;
+                    double* buf = new double[m.len]();
+                    int pos;
+                    read(sock, &pos, sizeof(pos));
+                    read(sock, buf, m.len);
+                    memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
+                    valsreceived++;
+                    if (valsreceived >= numclients) redraw = true;
                     #else
 
                     #endif
                     break;
+                }
                 case MessageType::Text:
                     //printf("Expecting string of length: %d\n", m.len);
                     char* buf = new char[m.len + 1]();
-                    ret = read(sock, buf, m.len);
+                    read(sock, buf, m.len);
                     buf[m.len] = 0;
                     //printf("Received %d\n", ret);
                     printf("Server: \"%s\"\n", buf);
@@ -566,7 +595,12 @@ int main()
         if (recalc)
         {
             //m.Update(vals);
-            redraw = true;
+
+            m.type = Recalc;
+            m.len = 0;
+            send(sock, &m, sizeof(m), 0);
+            valsreceived = 0;
+
             recalc = false;
         }
 
