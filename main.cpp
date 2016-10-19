@@ -439,13 +439,13 @@ int main()
                     #else
                     mandl.parallel_pos = m.len;
                     printf("Rendering with pos %d...", mandl.parallel_pos);
-                    double *vals = new double[mandl.width * mandl.height];
+                    double *vals = new double[mandl.width * mandl.parallel_height];
                     mandl.Update(vals);
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
-                    printf("Sending vals to server (%d -> %d)...\n", sizeof(double), sizeof(double) * (mandl.width * mandl.height));
-                    smsg.len = (mandl.width * mandl.height) * sizeof(double);
+                    printf("Sending vals to server (%d -> %d)...\n", sizeof(double), sizeof(double) * (mandl.width * mandl.parallel_height));
+                    smsg.len = (mandl.width * mandl.parallel_height) * sizeof(double);
                     printf("Header...");
                     send(sock, &smsg, sizeof(smsg), MSG_MORE);
                     printf("Done.\nPos...");
