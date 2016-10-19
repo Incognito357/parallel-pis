@@ -429,7 +429,7 @@ int main()
                     printf("Header...");
                     send(sock, &smsg, sizeof(smsg), 0);
                     printf("Done.\nPos...");
-                    send(sock, &mandl.parallel_pos, sizeof(mandl.parallel_pos), 0);
+                    send(sock, &m.len, sizeof(m.len), 0);
                     printf("Done.\nVals...");
                     send(sock, vals, smsg.len, 0);
                     printf("Done.\n");
