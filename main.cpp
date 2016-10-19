@@ -385,7 +385,8 @@ int main()
                             read(s, &cur, sizeof(cur));
                             printf("Relaying vals from %d...", cur);
                             double *buf = new double[m.len / sizeof(double)]();
-                            read(s, buf, m.len);
+                            if (read(s, buf, m.len) < m.len)
+                                printf("Did not receive the entire buffer...\n");
                             bool found = false;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -514,7 +515,8 @@ int main()
                     printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(double), m.len, pos);
                     double* buf = new double[m.len / sizeof(double)]();
                     printf("Reading...");
-                    read(sock, buf, m.len);
+                    if (read(sock, buf, m.len) < m.len)
+                        printf("Did not receive the entire buffer...\n");
                     printf("Done.\nCopying values into full array...");
                     memcpy(&vals[pos * (m.len / sizeof(double))], buf, m.len);
                     printf("Done.\n");
