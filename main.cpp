@@ -387,7 +387,7 @@ int main()
                             int ret = read(s, buf, m.len);
                             while (ret < m.len)
                             {
-                                int tmp = read(s, buf[ret], m.len - ret);
+                                int tmp = read(s, &buf[ret], m.len - ret);
                                 if (tmp < 0)
                                 {
                                     printf("Err: %d\n", errno);
@@ -527,7 +527,7 @@ int main()
                     ret = read(sock, buf, m.len);
                     while (ret < m.len)
                     {
-                        int tmp = read(sock, buf[ret], m.len - ret);
+                        int tmp = read(sock, &buf[ret], m.len - ret);
                         if (tmp < 0)
                         {
                             printf("Err: %d\n", errno);
