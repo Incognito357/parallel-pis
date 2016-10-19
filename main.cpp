@@ -429,7 +429,7 @@ int main()
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
-                    printf("Sending vals to server...\n");
+                    printf("Sending vals to server (%d -> %d)...\n", sizeof(double), sizeof(double) * (mandl.width * mandl.height));
                     smsg.len = (mandl.width * mandl.height) * sizeof(double);
                     printf("Header...");
                     send(sock, &smsg, sizeof(smsg), 0);
@@ -494,7 +494,7 @@ int main()
                     #ifdef CLIENT
                     int pos;
                     read(sock, &pos, sizeof(pos));
-                    printf("Receiving values from pos %d...", pos);
+                    printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(double), m.len, pos);
                     double* buf = new double[m.len]();
                     printf("Reading...");
                     read(sock, buf, m.len);
