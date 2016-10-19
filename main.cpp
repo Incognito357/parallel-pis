@@ -370,7 +370,7 @@ int main()
                         {
                             int cur;
                             read(s, &cur, sizeof(cur));
-                            printf("Relaying vals from %d\n", cur);
+                            printf("Relaying vals from %d...", cur);
                             double *buf = new double[m.len]();
                             read(s, buf, m.len);
                             for (int j = 0; j < MAXCLIENTS; j++)
@@ -379,6 +379,8 @@ int main()
                                 send(clients[j], &m, sizeof(m), 0);
                                 send(clients[j], &cur, sizeof(cur), 0);
                                 send(clients[j], buf, m.len, 0);
+                                printf("Done.\n");
+                                break;
                             }
                             delete[] buf;
                             break;
@@ -424,7 +426,7 @@ int main()
                     smsg.type = Vals;
                     smsg.len = (mandl.width * mandl.height) * sizeof(double);
                     send(sock, &smsg, sizeof(smsg), 0);
-                    send(sock, &mandl.parallel_pos, m.len, 0);
+                    send(sock, &mandl.parallel_pos, sizeof(mandl.parallel_pos), 0);
                     send(sock, vals, smsg.len, 0);
                     printf("Sent values to server\n");
                     delete[] vals;
@@ -481,16 +483,18 @@ int main()
                 case MessageType::Vals:
                 {
                     #ifdef CLIENT
-                    double* buf = new double[m.len]();
                     int pos;
                     read(sock, &pos, sizeof(pos));
-                    printf("Received values from pos %d\n", pos);
+                    printf("Receiving values from pos %d...", pos);
+                    double* buf = new double[m.len]();
                     read(sock, buf, m.len);
+                    printf("Done. Copying values into full array...");
                     memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
+                    printf("Done.\n");
                     valsreceived++;
                     if (valsreceived >= numclients)
                     {
-                        printf("All values received, rendering...\n");
+                        printf("All values received\n");
                         redraw = true;
                     }
                     #else
@@ -506,7 +510,7 @@ int main()
                     //printf("Received %d\n", ret);
                     printf("Server: \"%s\"\n", buf);
                     delete[] buf;
-                    SendText(sock, "Received message from server");
+                    //SendText(sock, "Received message from server");
                     break;
             }
         }
@@ -632,6 +636,7 @@ int main()
 
         if (redraw)
         {
+            printf("Rendering...");
             SDL_SetRenderDrawColor(renderer, backColor.r, backColor.g, backColor.b, 255);
             SDL_RenderClear(renderer);
             for (int y = 0; y < INIT_SCREEN_HEIGHT; y++)
@@ -730,6 +735,7 @@ int main()
             }
 
             SDL_RenderPresent(renderer);
+            printf("Done.\n");
             redraw = false;
         }
 
