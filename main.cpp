@@ -388,7 +388,12 @@ int main()
                             while (ret < m.len)
                             {
                                 int tmp = read(s, &buf[ret], m.len - ret);
-                                printf("Read another %d bytes (%d / %d)", tmp, tmp + ret, m.len);
+                                if (tmp < 0)
+                                {
+                                    printf("Err: %d\n", errno);
+                                    continue;
+                                }
+                                printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
                                 ret += tmp;
                             }
                             bool found = false;
@@ -518,12 +523,17 @@ int main()
                     read(sock, &pos, sizeof(pos));
                     printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(double), m.len, pos);
                     double* buf = new double[m.len / sizeof(double)]();
-                    printf("Reading...");
+                    printf("Reading...\n");
                     ret = read(sock, buf, m.len);
                     while (ret < m.len)
                     {
                         int tmp = read(sock, &buf[ret], m.len - ret);
-                        printf("Read another %d bytes (%d / %d)", tmp, tmp + ret, m.len);
+                        if (tmp < 0)
+                        {
+                            printf("Err: %d\n", errno);
+                            continue;
+                        }
+                        printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
                         ret += tmp;
                     }
                     printf("Done.\nCopying values into full array...");
