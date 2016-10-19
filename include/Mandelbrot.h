@@ -18,6 +18,7 @@ class Mandelbrot
         long double zoom = 0.004L;
         long double offx = 0L, offy = 0L;
         int width = INIT_SCREEN_WIDTH, height = INIT_SCREEN_HEIGHT;
+        int parallel_height = INIT_SCREEN_HEIGHT;
     protected:
     private:
         void Slice(double* vals, int minY, int maxY) const;

@@ -376,7 +376,7 @@ int main()
                             int cur;
                             read(s, &cur, sizeof(cur));
                             printf("Relaying vals from %d...", cur);
-                            double *buf = new double[m.len]();
+                            double *buf = new double[m.len / sizeof(double)]();
                             read(s, buf, m.len);
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -473,6 +473,9 @@ int main()
                 case MessageType::Connections:
                     numclients = m.len;
                     printf("Number of clients is now: %d\n", numclients);
+                    #ifndef CLIENT
+                    mandl.parallel_height = mandl.height / numclients;
+                    #endif
                     break;
                 case MessageType::ResX:
                     #ifdef CLIENT
@@ -486,7 +489,7 @@ int main()
 
                     #else
                     read(sock, &mandl.height, m.len);
-                    mandl.height /= numclients;
+                    mandl.parallel_height = mandl.height / numclients;
                     #endif
                     break;
                 case MessageType::Vals:
@@ -495,7 +498,7 @@ int main()
                     int pos;
                     read(sock, &pos, sizeof(pos));
                     printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(double), m.len, pos);
-                    double* buf = new double[m.len]();
+                    double* buf = new double[m.len / sizeof(double)]();
                     printf("Reading...");
                     read(sock, buf, m.len);
                     printf("Done.\nCopying values into full array...");
