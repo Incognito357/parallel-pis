@@ -9,7 +9,7 @@
 #define MAXBUF
 
 enum MessageType {
-    Recalc, OffX, OffY, Zoom, Iter, Vals, ResX, ResY, Connections, Text
+    NoEvent, Recalc, OffX, OffY, Zoom, Iter, Vals, ResX, ResY, Connections, Text
 };
 
 struct Message {

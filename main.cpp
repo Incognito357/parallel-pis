@@ -629,6 +629,7 @@ int main()
             m.type = Recalc;
             m.len = 0;
             send(sock, &m, sizeof(m), 0);
+            printf("Recalc request sent\n");
             valsreceived = 0;
 
             recalc = false;
