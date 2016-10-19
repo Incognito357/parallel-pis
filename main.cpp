@@ -381,12 +381,16 @@ int main()
                         case MessageType::Vals:
                         {
                             int cur;
-                            printf("Vals received\n");
                             read(s, &cur, sizeof(cur));
-                            printf("Relaying vals from %d...", cur);
+                            printf("Relaying vals from %d...\n", cur);
                             double *buf = new double[m.len / sizeof(double)]();
                             int ret = read(s, buf, m.len);
-                            while (ret < m.len) ret += read(s, &buf[ret], m.len - ret);
+                            while (ret < m.len)
+                            {
+                                int tmp = read(s, &buf[ret], m.len - ret);
+                                printf("Read another %d bytes (%d / %d)", tmp, tmp + ret, m.len);
+                                ret += tmp;
+                            }
                             bool found = false;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -516,7 +520,12 @@ int main()
                     double* buf = new double[m.len / sizeof(double)]();
                     printf("Reading...");
                     ret = read(sock, buf, m.len);
-                    while (ret < m.len) ret += read(sock, &buf[ret], m.len - ret);
+                    while (ret < m.len)
+                    {
+                        int tmp = read(sock, &buf[ret], m.len - ret);
+                        printf("Read another %d bytes (%d / %d)", tmp, tmp + ret, m.len);
+                        ret += tmp;
+                    }
                     printf("Done.\nCopying values into full array...");
                     memcpy(&vals[pos * (m.len / sizeof(double))], buf, m.len);
                     printf("Done.\n");
