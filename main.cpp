@@ -501,7 +501,7 @@ int main()
                     double* buf = new double[m.len / sizeof(double)]();
                     printf("Reading...");
                     read(sock, buf, m.len);
-                    printf("Done.\nCopying values into full array...");
+                    printf("Done.\nTest\nCopying values into full array...");
                     memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
