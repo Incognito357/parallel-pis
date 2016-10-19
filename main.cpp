@@ -319,15 +319,18 @@ int main()
                     printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
-                    if (cltypes[i] == 1) numclients--;
-                    cltypes[i] = 0;
-                    for (int j = 0; j < MAXCLIENTS; j++)
+                    if (cltypes[i] == 1)
                     {
-                        if (clients[j] == 0) continue;
-                        m.type = Connections;
-                        m.len = numclients;
-                        send(clients[j], &m, sizeof(m), 0);
+                        numclients--;
+                        for (int j = 0; j < MAXCLIENTS; j++)
+                        {
+                            if (clients[j] == 0) continue;
+                            m.type = Connections;
+                            m.len = numclients;
+                            send(clients[j], &m, sizeof(m), 0);
+                        }
                     }
+                    cltypes[i] = 0;
                 }
                 else
                 {
@@ -493,6 +496,7 @@ int main()
                     read(sock, &pos, sizeof(pos));
                     printf("Receiving values from pos %d...", pos);
                     double* buf = new double[m.len]();
+                    printf("Reading...");
                     read(sock, buf, m.len);
                     printf("Done.\nCopying values into full array...");
                     memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
