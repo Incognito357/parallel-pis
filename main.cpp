@@ -344,7 +344,8 @@ int main()
                     {
                         case MessageType::Recalc:
                         {
-                            printf("Begin rendering...\n");
+                            if (numclients == 0) printf("No suitable clients connected to calculate!\n");
+                            else printf("Begin rendering...\n");
                             int cl = 0;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -380,19 +381,26 @@ int main()
                         case MessageType::Vals:
                         {
                             int cur;
+                            printf("Vals received\n");
                             read(s, &cur, sizeof(cur));
                             printf("Relaying vals from %d...", cur);
                             double *buf = new double[m.len / sizeof(double)]();
                             read(s, buf, m.len);
+                            bool found = false;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
                                 if (j == i || clients[j] == 0 || cltypes[j] != 2) continue;
+                                printf("Sending vals to render...\nHeader...");
                                 send(clients[j], &m, sizeof(m), MSG_MORE);
+                                printf("Done.\nPos...");
                                 send(clients[j], &cur, sizeof(cur), MSG_MORE);
+                                printf("Done.\nVals...");
                                 send(clients[j], buf, m.len, 0);
                                 printf("Done.\n");
+                                found = true;
                                 break;
                             }
+                            if (!found) printf("Could not find suitable render client.\n");
                             delete[] buf;
                             break;
                         }
@@ -517,7 +525,7 @@ int main()
                         redraw = true;
                     }
                     #else
-
+                    printf("Pi received values... Pi should only send values!\n");
                     #endif
                     break;
                 }
