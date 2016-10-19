@@ -394,7 +394,7 @@ int main()
                                 send(clients[j], &m, sizeof(m), MSG_MORE);
                                 printf("Done.\nPos...");
                                 send(clients[j], &cur, sizeof(cur), MSG_MORE);
-                                printf("Done.\nVals...");
+                                printf("Done.\nVals...\n");
                                 send(clients[j], buf, m.len, 0);
                                 printf("Done.\n");
                                 found = true;
@@ -449,7 +449,7 @@ int main()
                     send(sock, &smsg, sizeof(smsg), MSG_MORE);
                     printf("Done.\nPos...");
                     send(sock, &m.len, sizeof(m.len), MSG_MORE);
-                    printf("Done.\nVals...");
+                    printf("Done.\nVals...\n");
                     send(sock, vals, smsg.len, 0);
                     printf("Done.\n");
                     delete[] vals;
