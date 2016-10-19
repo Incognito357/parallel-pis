@@ -301,6 +301,12 @@ int main()
                             send(clients[j], &m, sizeof(m), 0);
                         }
                     }
+                    else
+                    {
+                        m.type = Connections;
+                        m.len = numclients;
+                        send(newsock, &m, sizeof(m), 0);
+                    }
                     cltypes[i] = cltype;
                     break;
                 }
@@ -381,8 +387,8 @@ int main()
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
                                 if (j == i || clients[j] == 0 || cltypes[j] != 2) continue;
-                                send(clients[j], &m, sizeof(m), 0);
-                                send(clients[j], &cur, sizeof(cur), 0);
+                                send(clients[j], &m, sizeof(m), MSG_MORE);
+                                send(clients[j], &cur, sizeof(cur), MSG_MORE);
                                 send(clients[j], buf, m.len, 0);
                                 printf("Done.\n");
                                 break;
@@ -432,9 +438,9 @@ int main()
                     printf("Sending vals to server (%d -> %d)...\n", sizeof(double), sizeof(double) * (mandl.width * mandl.height));
                     smsg.len = (mandl.width * mandl.height) * sizeof(double);
                     printf("Header...");
-                    send(sock, &smsg, sizeof(smsg), 0);
+                    send(sock, &smsg, sizeof(smsg), MSG_MORE);
                     printf("Done.\nPos...");
-                    send(sock, &m.len, sizeof(m.len), 0);
+                    send(sock, &m.len, sizeof(m.len), MSG_MORE);
                     printf("Done.\nVals...");
                     send(sock, vals, smsg.len, 0);
                     printf("Done.\n");
@@ -501,8 +507,8 @@ int main()
                     double* buf = new double[m.len / sizeof(double)]();
                     printf("Reading...");
                     read(sock, buf, m.len);
-                    printf("Done.\nTest\nCopying values into full array...");
-                    memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
+                    printf("Done.\nCopying values into full array...");
+                    memcpy(&vals[pos * (m.len / sizeof(double))], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
                     if (valsreceived >= numclients)
