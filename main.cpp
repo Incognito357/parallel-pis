@@ -290,16 +290,18 @@ int main()
                 {
                     clients[i] = newsock;
                     printf("Client %d added to list\n", i);
-                    if (cltype == 1) numclients++;
-                    cltypes[i] = cltype;
-                    for (int j = 0; j < MAXCLIENTS; j++)
+                    if (cltype == 1)
                     {
-                        if (clients[j] == 0) continue;
-                        m.type = Connections;
-                        m.len = numclients;
-                        send(clients[j], &m, sizeof(m), 0);
+                        numclients++;
+                        for (int j = 0; j < MAXCLIENTS; j++)
+                        {
+                            if (clients[j] == 0) continue;
+                            m.type = Connections;
+                            m.len = numclients;
+                            send(clients[j], &m, sizeof(m), 0);
+                        }
                     }
-
+                    cltypes[i] = cltype;
                     break;
                 }
             }
@@ -340,7 +342,7 @@ int main()
                                 if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
                                 m.len = cl;
                                 send(clients[j], &m, sizeof(m), 0);
-                                printf("Client %d is rendering %d", j, cl);
+                                printf("Client %d is rendering %d\n", j, cl);
                                 cl++;
                             }
                             break;
