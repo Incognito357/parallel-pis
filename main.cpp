@@ -424,11 +424,15 @@ int main()
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
+                    printf("Sending vals to server...\n");
                     smsg.len = (mandl.width * mandl.height) * sizeof(double);
+                    printf("Header...");
                     send(sock, &smsg, sizeof(smsg), 0);
+                    printf("Done.\nPos...");
                     send(sock, &mandl.parallel_pos, sizeof(mandl.parallel_pos), 0);
+                    printf("Done.\nVals...");
                     send(sock, vals, smsg.len, 0);
-                    printf("Sent values to server\n");
+                    printf("Done.\n");
                     delete[] vals;
                     #endif
                     break;
@@ -488,7 +492,7 @@ int main()
                     printf("Receiving values from pos %d...", pos);
                     double* buf = new double[m.len]();
                     read(sock, buf, m.len);
-                    printf("Done. Copying values into full array...");
+                    printf("Done.\nCopying values into full array...");
                     memcpy(&vals[pos * ((resx * resy) / numclients)], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
