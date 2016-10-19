@@ -371,7 +371,7 @@ int main()
                             int cur;
                             read(s, &cur, sizeof(cur));
                             printf("Relaying vals from %d\n", cur);
-                            double *buf = new double[m.len];
+                            double *buf = new double[m.len]();
                             read(s, buf, m.len);
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -422,7 +422,7 @@ int main()
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
-                    smsg.len = (mandl.width * mandl.height) * sizeof(long double);
+                    smsg.len = (mandl.width * mandl.height) * sizeof(double);
                     send(sock, &smsg, sizeof(smsg), 0);
                     send(sock, &mandl.parallel_pos, m.len, 0);
                     send(sock, vals, smsg.len, 0);
