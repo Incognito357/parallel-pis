@@ -393,9 +393,10 @@ int main()
                                     printf("Err: %d\n", errno);
                                     break;
                                 }
-                                printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
+                                //printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
                                 ret += tmp;
                             }
+                            printf("Read %d / %d bytes\n", ret, m.len);
                             bool found = false;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
@@ -555,9 +556,10 @@ int main()
                             printf("Err: %d\n", errno);
                             break;
                         }
-                        printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
+                        //printf("Read another %d bytes (%d / %d)\n", tmp, tmp + ret, m.len);
                         ret += tmp;
                     }
+                    printf("Read %d / %d bytes\n", ret, m.len);
                     printf("Done.\nCopying values into full array...");
                     memcpy(&vals[pos * (m.len / sizeof(short))], buf, m.len);
                     printf("Done.\n");
@@ -714,7 +716,7 @@ int main()
             {
                 for (int x = 0; x < INIT_SCREEN_WIDTH; x++)
                 {
-                    double n = vals[y * INIT_SCREEN_WIDTH + x];
+                    double n = vals[y * INIT_SCREEN_WIDTH + x] / 100.0f;
                     if (n < 0) continue;
                     int k = (int)n;
                     if (style == Banded)
