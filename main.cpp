@@ -227,7 +227,7 @@ int main()
     int lastiter = INIT_ITER;
     Style style = Banded;
     Palette palette = Linear;
-    double *vals = new double[INIT_SCREEN_HEIGHT * INIT_SCREEN_WIDTH]();
+    int *vals = new int[INIT_SCREEN_HEIGHT * INIT_SCREEN_WIDTH]();
 
     bool redraw = false;
     bool recalc = true;
@@ -448,13 +448,13 @@ int main()
                     #else
                     mandl.parallel_pos = m.len;
                     printf("Rendering with pos %d...", mandl.parallel_pos);
-                    double *vals = new double[mandl.width * mandl.parallel_height];
+                    int *vals = new int[mandl.width * mandl.parallel_height];
                     mandl.Update(vals);
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
-                    printf("Sending vals to server (%d -> %d)...\n", sizeof(double), sizeof(double) * (mandl.width * mandl.parallel_height));
-                    smsg.len = (mandl.width * mandl.parallel_height) * sizeof(double);
+                    printf("Sending vals to server (%d -> %d)...\n", sizeof(int), sizeof(int) * (mandl.width * mandl.parallel_height));
+                    smsg.len = (mandl.width * mandl.parallel_height) * sizeof(int);
                     printf("Header...");
                     send(sock, &smsg, sizeof(smsg), MSG_MORE);
                     printf("Done.\nPos...");
@@ -521,8 +521,8 @@ int main()
                     #ifdef CLIENT
                     int pos;
                     read(sock, &pos, sizeof(pos));
-                    printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(double), m.len, pos);
-                    double* buf = new double[m.len / sizeof(double)]();
+                    printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(int), m.len, pos);
+                    int* buf = new int[m.len / sizeof(int)]();
                     printf("Reading...\n");
                     ret = read(sock, buf, m.len);
                     while (ret < m.len)
@@ -537,7 +537,7 @@ int main()
                         ret += tmp;
                     }
                     printf("Done.\nCopying values into full array...");
-                    memcpy(&vals[pos * (m.len / sizeof(double))], buf, m.len);
+                    memcpy(&vals[pos * (m.len / sizeof(int))], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
                     if (valsreceived >= numclients)
