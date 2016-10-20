@@ -405,7 +405,18 @@ int main()
                                 printf("Done.\nPos...");
                                 send(clients[j], &cur, sizeof(cur), MSG_MORE);
                                 printf("Done.\nVals...\n");
-                                send(clients[j], buf, m.len, 0);
+                                int sent = 0;
+                                while(sent < m.len)
+                                {
+                                    int n = send(clients[j], buf, m.len - sent, 0);
+                                    if (n < 0)
+                                    {
+                                        printf("Send - Err: %d\n", errno);
+                                        break;
+                                    }
+                                    printf("Sent another %d bytes...\n", n);
+                                    sent += n;
+                                }
                                 printf("Done.\n");
                                 found = true;
                                 break;
@@ -460,7 +471,18 @@ int main()
                     printf("Done.\nPos...");
                     send(sock, &m.len, sizeof(m.len), MSG_MORE);
                     printf("Done.\nVals...\n");
-                    send(sock, vals, smsg.len, 0);
+                    int sent = 0;
+                    while(sent < smsg.len)
+                    {
+                        int n = send(sock, vals, smsg.len - sent, 0);
+                        if (n < 0)
+                        {
+                            printf("Send - Err: %d\n", errno);
+                            break;
+                        }
+                        printf("Sent another %d bytes...\n", n);
+                        sent += n;
+                    }
                     printf("Done.\n");
                     delete[] vals;
                     #endif
