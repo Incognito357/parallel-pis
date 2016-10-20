@@ -465,8 +465,8 @@ int main()
                     printf("Done\n");
                     Message smsg;
                     smsg.type = Vals;
-                    printf("Sending vals to server (%d -> %d)...\n", sizeof(short), sizeof(short) * (mandl.width * mandl.parallel_height));
                     smsg.len = (mandl.width * mandl.parallel_height) * sizeof(short);
+                    printf("Sending vals to server (%d values, %d bytes)...\n", mandl.width * mandl.parallel_height, smsg.len);
                     printf("Header...");
                     send(sock, &smsg, sizeof(smsg), MSG_MORE);
                     printf("Done.\nPos...");
@@ -544,7 +544,7 @@ int main()
                     #ifdef CLIENT
                     int pos;
                     read(sock, &pos, sizeof(pos));
-                    printf("Receiving (%d -> %d) values from pos %d...\n", sizeof(short), m.len, pos);
+                    printf("Receiving %d values (%d bytes) from pos %d...\n", m.len / sizeof(short), m.len, pos);
                     short* buf = new short[m.len / sizeof(short)]();
                     printf("Reading...\n");
                     ret = read(sock, buf, m.len);
