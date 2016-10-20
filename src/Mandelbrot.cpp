@@ -5,7 +5,7 @@ Mandelbrot::Mandelbrot()
 
 }
 
-void Mandelbrot::Update(int *vals) const
+void Mandelbrot::Update(short *vals) const
 {
     int step = parallel_height / thread::hardware_concurrency();
     vector<thread> threads;
@@ -14,7 +14,7 @@ void Mandelbrot::Update(int *vals) const
     for (auto &t : threads) t.join();
 }
 
-void Mandelbrot::Slice(int *vals, int minY, int maxY) const
+void Mandelbrot::Slice(short *vals, int minY, int maxY) const
 {
     long double real = 0L * zoom - width / 2.0L * zoom + offx;
     long double imags = minY * zoom - parallel_height / 2.0L * zoom + offy;
@@ -22,7 +22,7 @@ void Mandelbrot::Slice(int *vals, int minY, int maxY) const
     {
         long double imag = imags;
         for (int y = minY; y < maxY; y++, imag += zoom)
-            vals[(y - (parallel_pos * parallel_height)) * width + x] = (int)(Calculate(real, imag) * 100);
+            vals[(y - (parallel_pos * parallel_height)) * width + x] = (short)(Calculate(real, imag) * 100);
     }
 }
 
