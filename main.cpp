@@ -16,6 +16,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <unordered_map>
 
+#include <curl/curl.h>
+
 #include <vector>
 #include <sstream>
 #include <iomanip>
