@@ -238,6 +238,8 @@ int main()
     bool recalc = true;
     bool changeBack = false;
     bool hideVals = false;
+    bool help = false;
+    bool run = true;
     long double loffx = 0L, loffy = 0L;
     long double curzoom = INIT_ZOOM;
     long double curoffx = 0L, curoffy = 0L;
@@ -251,7 +253,7 @@ int main()
 
     #endif
 
-    while (true)
+    while (run)
     {
         #ifdef MASTER
 
@@ -615,18 +617,22 @@ int main()
                 keys[e.key.keysym.sym] = true;
                 switch (e.key.keysym.sym)
                 {
-                    case SDLK_ESCAPE: return 0;
+                    case SDLK_ESCAPE:
+                    case SDLK_q: run = false; break;
                     case SDLK_r: recalc = true; break;
                     case SDLK_t: redraw = true; break;
                     case SDLK_b: changeBack = !changeBack; redraw = true; break;
                     case SDLK_s: style = (Style)((style + 1) % STYLE_SIZE);
                         redraw = true;
                         break;
+                    case SDLK_h: help = !help; redraw = true; break;
                     case SDLK_a: palette = (Palette)((palette + 1) % PALETTE_SIZE);
                         redraw = true;
                         break;
                     case SDLK_z: hideVals = !hideVals; redraw = true; break;
                 }
+
+                if (!run) break;
             }
             else if (e.type == SDL_KEYUP && keys[e.key.keysym.sym]) keys[e.key.keysym.sym] = false;
             else if (e.type == SDL_MOUSEMOTION)
@@ -736,6 +742,8 @@ int main()
 
             if (tmp.r != (changeBack ? backColor.r : linearColor.r) || tmp.g != (changeBack ? backColor.g : linearColor.g) || tmp.b != (changeBack ? backColor.b : linearColor.b)) redraw = true;
         }
+
+        if (!run) break;
 
         SDL_Delay(1);
 
