@@ -57,6 +57,8 @@ int main()
     char cltypes[MAXCLIENTS];
     fd_set fds;
 
+    bool queuerecalc = false;
+
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
@@ -225,6 +227,7 @@ int main()
     int lx = -1, ly = -1;
     int mx = 0, my = 0;
     int lastiter = INIT_ITER;
+    int curiter = lastiter;
     Style style = Banded;
     Palette palette = Linear;
     short *vals = new short[INIT_SCREEN_HEIGHT * INIT_SCREEN_WIDTH]();
@@ -344,7 +347,16 @@ int main()
                     {
                         case MessageType::Recalc:
                         {
-                            if (numclients == 0) printf("No suitable clients connected to calculate!\n");
+                            if (queuerecalc)
+                            {
+                                printf("Recalc already queued\n");
+                                break;
+                            }
+                            if (numclients == 0)
+                            {
+                                printf("No suitable clients connected to calculate!\n");
+                                break;
+                            }
                             else printf("Begin rendering...\n");
                             int cl = 0;
                             for (int j = 0; j < MAXCLIENTS; j++)
@@ -357,33 +369,35 @@ int main()
                             }
                             break;
                         }
-                        case MessageType::OffX:
-
-                            break;
-                        case MessageType::OffY:
-
-                            break;
-                        case MessageType::Iter:
-
-                            break;
-                        case MessageType::Zoom:
-
-                            break;
                         case MessageType::Connections:
 
                             break;
+                        //just transfer these packets
+                        case MessageType::OffX:
+                        case MessageType::OffY:
+                        case MessageType::Iter:
+                        case MessageType::Zoom:
                         case MessageType::ResX:
-
-                            break;
                         case MessageType::ResY:
-
+                        {
+                            char* buf;
+                            int cl = 0;
+                            for (int j = 0; j < MAXCLIENTS; j++)
+                            {
+                                if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
+                                m.len = cl;
+                                send(clients[j], &m, sizeof(m), 0);
+                                printf("Client %d is rendering %d\n", j, cl);
+                                cl++;
+                            }
                             break;
+                        }
                         case MessageType::Vals:
                         {
                             int cur;
                             read(s, &cur, sizeof(cur));
                             printf("Relaying vals from %d...\n", cur);
-                            short *buf = new short[m.len / sizeof(short)]();
+                            char *buf = new char[m.len]();
                             int ret = read(s, buf, m.len);
                             while (ret < m.len)
                             {
@@ -545,7 +559,7 @@ int main()
                     int pos;
                     read(sock, &pos, sizeof(pos));
                     printf("Receiving %d values (%d bytes) from pos %d...\n", m.len / sizeof(short), m.len, pos);
-                    short* buf = new short[m.len / sizeof(short)]();
+                    char* buf = new char[m.len]();
                     printf("Reading...\n");
                     ret = read(sock, buf, m.len);
                     while (ret < m.len)
@@ -560,7 +574,7 @@ int main()
                         ret += tmp;
                     }
                     printf("Read %d / %d bytes\n", ret, m.len);
-                    printf("Done.\nCopying values into full array...");
+                    printf("Done.\nCopying values into full array... moving to %d...", pos * (m.len / sizeof(short)));
                     memcpy(&vals[pos * (m.len / sizeof(short))], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
@@ -618,6 +632,15 @@ int main()
                 if (keys[e.button.button])
                 {
                     //SEND THESE COORDINATES
+                    Message sm;
+                    sm.type = OffX;
+                    sm.len = sizeof(long double);
+                    curoffx = loffx + (lx - mx) * curzoom;
+                    curoffy = loffy + (ly - my) * curzoom;
+
+                    send(sock, &curoffx, sm.len, 0);
+                    sm.type = OffY;
+                    send(sock, &curoffy, sm.len, 0);
                     //m.offx = loffx + (lx - mx) * m.zoom;
                     //m.offy = loffy + (ly - my) * m.zoom;
                     recalc = true;
@@ -634,6 +657,8 @@ int main()
             else if (e.type == SDL_MOUSEBUTTONUP)
             {
                 //RECEIVE THESE COORDINATES
+                loffx = curoffx;
+                loffy = curoffy;
                 //loffx = m.offx;
                 //loffy = m.offy;
                 keys[e.button.button] = false;
@@ -644,15 +669,31 @@ int main()
                 {
 
                     //SEND THESE VALUES
+                    loffx = curoffx = loffx + (mx * curzoom) - ((resx / 2.0L) * curzoom);
+                    loffy = curoffy = loffy + (my * curzoom) - ((resy / 2.0L) * curzoom);
+                    curzoom /= 1.1L * e.wheel.y;
                     //loffx = m.offx = loffx + (mx * m.zoom) - ((SCREEN_WIDTH / 2.0) * m.zoom);
                     //loffy = m.offy = loffy + (my * m.zoom) - ((SCREEN_HEIGHT / 2.0) * m.zoom);
                     //m.zoom /= 1.1 * e.wheel.y;
-                    SDL_WarpMouseInWindow(w, INIT_SCREEN_WIDTH / 2.0, INIT_SCREEN_HEIGHT / 2.0);
+                    Message sm;
+                    sm.type = OffX;
+                    sm.len = sizeof(long double);
+                    send(sock, &curoffx, sm.len, 0);
+                    sm.type = OffY;
+                    send(sock, &curoffy, sm.len, 0);
+                    sm.type = Zoom;
+                    send(sock, &curzoom, sm.len, 0);
+                    SDL_WarpMouseInWindow(w, resx / 2.0, resy / 2.0);
                     recalc = true;
                 }
                 else if (e.wheel.y < 0)
                 {
                     //SEND THIS VALUE
+                    curzoom *= -1.1L * e.wheel.y;
+                    Message sm;
+                    sm.type = Zoom;
+                    sm.len = sizeof(long double);
+                    send(sock, &curzoom, sm.len, 0);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
                 }
@@ -661,33 +702,35 @@ int main()
             SDL_Color tmp = (changeBack ? backColor : linearColor);
             if (keys[SDLK_KP_PLUS] && e.key.keysym.sym == SDLK_KP_PLUS)
             {
-                //SEND THIS INFORMATION
-                //if (keys[SDLK_i]) m.iter++;
+                if (keys[SDLK_i]) curiter++;
                 if (keys[SDLK_KP_1]) (changeBack ? backColor.r : linearColor.r) = min(255, (changeBack ? backColor.r : linearColor.r) + 1);
                 if (keys[SDLK_KP_2]) (changeBack ? backColor.g : linearColor.g) = min(255, (changeBack ? backColor.g : linearColor.g) + 1);
                 if (keys[SDLK_KP_3]) (changeBack ? backColor.b : linearColor.b) = min(255, (changeBack ? backColor.b : linearColor.b) + 1);
 
-                //if (m.iter > MAX_ITER) m.iter = MAX_ITER;
+                if (curiter > MAX_ITER) curiter = MAX_ITER;
             }
 
             if (keys[SDLK_KP_MINUS] && e.key.keysym.sym == SDLK_KP_MINUS)
             {
-                //SEND THIS INFORMATION
-                //if (keys[SDLK_i]) m.iter--;
+                if (keys[SDLK_i]) curiter--;
                 if (keys[SDLK_KP_1]) (changeBack ? backColor.r : linearColor.r) = max(0, (changeBack ? backColor.r : linearColor.r) - 1);
                 if (keys[SDLK_KP_2]) (changeBack ? backColor.g : linearColor.g) = max(0, (changeBack ? backColor.g : linearColor.g) - 1);
                 if (keys[SDLK_KP_3]) (changeBack ? backColor.b : linearColor.b) = max(0, (changeBack ? backColor.b : linearColor.b) - 1);
 
-                //if (m.iter < 2) m.iter = 2;
+                if (curiter < 2) curiter = 2;
             }
 
-            /*
-            if (m.iter != lastiter)
+            //SEND THIS INFORMATION
+            if (curiter != lastiter)
             {
                 recalc = true;
-                lastiter = m.iter;
+                lastiter = curiter;
+                Message sm;
+                sm.type = Iter;
+                sm.len = sizeof(int);
+                send(sock, &curiter, sm.len, 0);
             }
-            */
+
 
             if (tmp.r != (changeBack ? backColor.r : linearColor.r) || tmp.g != (changeBack ? backColor.g : linearColor.g) || tmp.b != (changeBack ? backColor.b : linearColor.b)) redraw = true;
         }
@@ -767,20 +810,20 @@ int main()
                 }
             }
 
-            string vals = "";
+            string strvals = "";
             if (!hideVals)
             {
                 ostringstream zoom;
                 ostringstream bounds;
-                //zoom << setprecision(24) << fixed << m.zoom;
-                //bounds << setprecision(24) << fixed << "    " << m.offx << ",\n    " << m.offy;
-                vals = "Zoom: " + zoom.str() + "\nCenter: {\n" + bounds.str() + "\n}";
+                zoom << setprecision(24) << fixed << curzoom;
+                bounds << setprecision(24) << fixed << "    " << curoffx << ",\n    " << curoffy;
+                strvals = "Zoom: " + zoom.str() + "\nCenter: {\n" + bounds.str() + "\n}";
             }
 
             string s = "Palette: " + string(!changeBack ? "* " : "") + PaletteNames[palette] + "\n" +
                         "Inside: " + (changeBack ? "* " : "") + "{ " + to_string(backColor.r) + ", " + to_string(backColor.g) + ", " + to_string(backColor.b) + " }\n" +
                         "Style: " + StyleNames[style] + "\n";
-            //            "Iters: " + to_string(m.iter) + "\n" + (hideVals ? "" : vals);
+                        "Iters: " + to_string(curiter) + "\n" + (hideVals ? "" : strvals);
 
             SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
