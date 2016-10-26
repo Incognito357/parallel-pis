@@ -7,10 +7,15 @@ Mandelbrot::Mandelbrot()
 
 void Mandelbrot::Update(short *vals) const
 {
-    int step = parallel_height / thread::hardware_concurrency();
+    double stp = (double)parallel_height / thread::hardware_concurrency();
+    int step = 0;
+    if ((int)stp != stp) step = (int)stp + 1;
+    else step = (int)stp;
     vector<thread> threads;
     for (int i = 0; i < parallel_height; i += step)
-        threads.push_back(thread(&Mandelbrot::Slice, *this, ref(vals), (parallel_pos * parallel_height) + i, min((parallel_pos * parallel_height) + i + step, height)));
+        threads.push_back(thread(&Mandelbrot::Slice, *this, ref(vals),
+            (parallel_pos * parallel_height) + i,
+            (parallel_pos * parallel_height) + min(i + step, parallel_height)));
     for (auto &t : threads) t.join();
 }
 
@@ -22,7 +27,10 @@ void Mandelbrot::Slice(short *vals, int minY, int maxY) const
     {
         long double imag = imags;
         for (int y = minY; y < maxY; y++, imag += zoom)
+        {
+            //printf("Accessing %d\n", (y - (parallel_pos * parallel_height)) * width + x);
             vals[(y - (parallel_pos * parallel_height)) * width + x] = (short)(Calculate(real, imag) * 100);
+        }
     }
 }
 

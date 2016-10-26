@@ -73,6 +73,9 @@
 					<Add option="-g" />
 					<Add directory="include" />
 				</Compiler>
+				<Linker>
+					<Add option="-lpthreads" />
+				</Linker>
 			</Target>
 			<Target title="Client R">
 				<Option output="bin/Release/Senior Project" prefix_auto="1" extension_auto="1" />
@@ -115,6 +118,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-lpthreads" />
 				</Linker>
 			</Target>
 		</Build>
