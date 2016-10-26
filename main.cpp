@@ -584,7 +584,10 @@ int main()
                     printf("receive off x\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
-                    memcpy(&mandl.offx, buf, m.len);
+                    uint64_t tmp;
+                    memcpy(&tmp, buf, m.len);
+                    mandl.offx = unpack754_64(tmp);
+                    //memcpy(&mandl.offx, buf, m.len);
                     printf("\tgot: %Lf\n", mandl.offx);
                     #endif
                     break;
@@ -597,7 +600,9 @@ int main()
                     printf("receive off y\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
-                    memcpy(&mandl.offy, buf, m.len);
+                    uint64_t tmp;
+                    memcpy(&tmp, buf, m.len);
+                    mandl.offy = unpack754_64(tmp);
                     printf("\tgot: %Lf\n", mandl.offy);
                     #endif
                     break;
@@ -623,7 +628,9 @@ int main()
                     printf("receive zoom\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
-                    memcpy(&mandl.zoom, buf, m.len);
+                    uint64_t tmp;
+                    memcpy(&tmp, buf, m.len);
+                    mandl.zoom = unpack754_64(tmp);
                     printf("\tgot: %Lf\n", mandl.zoom);
                     #endif
                     break;
