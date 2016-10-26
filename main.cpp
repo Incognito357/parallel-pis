@@ -995,6 +995,7 @@ int main()
             SDL_RenderCopy(renderer, tex, NULL, &r);
             if (palette == Linear)
             {
+                SDL_DestroyTexture(tex);
                 s = "{ " + to_string(linearColor.r) + ", " + to_string(linearColor.g) + ", " + to_string(linearColor.b) + " }";
                 tex = RenderFromText(renderer, &r, s, font, linearColor, 500);
                 r.x = 120;
