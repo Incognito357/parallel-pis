@@ -79,6 +79,7 @@ int main()
     char cltypes[MAXCLIENTS];
     fd_set fds;
 
+    bool recalc = false;
     bool queuerecalc = false;
     vector<int> needrecalc;
 
@@ -376,12 +377,12 @@ int main()
                     {
                         case MessageType::Recalc:
                         {
-                            if (queuerecalc)
+                            if (recalc && queuerecalc)
                             {
                                 printf("Recalc already queued\n");
                                 break;
                             }
-                            else if (valsreceived < numclients)
+                            else if (recalc && valsreceived < numclients)
                             {
                                 printf("Queuing recalc\n");
                                 queuerecalc = true;
@@ -408,6 +409,7 @@ int main()
                                 printf("Client %d is rendering %d\n", j, cl);
                                 cl++;
                             }
+                            recalc = true;
                             break;
                         }
                         case MessageType::Connections:
@@ -489,6 +491,7 @@ int main()
                                         send(cur, &m, sizeof(m), 0);
                                         printf("Client %d is re-rendering %d\n", s, cur);
                                     }
+                                    if (needrecalc.size() == 0) queuerecalc = false;
                                 }
                                 break;
                             }
