@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <defines.h>
 
+using namespace std;
+
 #ifdef CLIENT
 
 #include <SDL2/SDL.h>
@@ -21,15 +23,27 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <string>
 
 double scale(double v, double vl, double vh, double nl, double nh)
 {
     return nl + (nh - nl) * (v - vl) / (vh - vl);
 }
 
-#endif
+SDL_Rect *RenderFromText(SDL_Renderer *r, SDL_Texture *tex, string t, TTF_Font *f, SDL_Color c, int wrap)
+{
+    if (tex != NULL) SDL_DestroyTexture(tex);
+    SDL_Surface *s = TTF_RenderText_Blended_Wrapped(f, t.c_str(), c, wrap);
+    tex = SDL_CreateTextureFromSurface(r, s);
+    if (tex == NULL) return NULL;
+    SDL_Rect *rect;
+    rect->x = 0; rect->y = 0;
+    rect->w = s->w;
+    rect->h = s->h;
+    SDL_FreeSurface(s);
+}
 
-using namespace std;
+#endif
 
 int SendText(int s, char* msg)
 {
@@ -246,6 +260,9 @@ int main()
     int resx = INIT_SCREEN_WIDTH, resy = INIT_SCREEN_HEIGHT;
     int valsreceived = 0;
     SDL_Event e;
+
+    string savename = "";
+    bool getsavename = false;
 
     #elif !defined(MASTER)
 
@@ -609,27 +626,60 @@ int main()
 
         #ifdef CLIENT
 
+        bool updatetext = false;
+
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT) return 0;
+            else if (e.type == SDL_TEXTINPUT)
+            {
+                savename += e.text.text;
+                updatetext = true;
+            }
             else if (e.type == SDL_KEYDOWN && !keys[e.key.keysym.sym])
             {
                 keys[e.key.keysym.sym] = true;
-                switch (e.key.keysym.sym)
+                if (!getsavename)
                 {
-                    case SDLK_ESCAPE:
-                    case SDLK_q: run = false; break;
-                    case SDLK_r: recalc = true; break;
-                    case SDLK_t: redraw = true; break;
-                    case SDLK_b: changeBack = !changeBack; redraw = true; break;
-                    case SDLK_s: style = (Style)((style + 1) % STYLE_SIZE);
-                        redraw = true;
-                        break;
-                    case SDLK_h: help = !help; redraw = true; break;
-                    case SDLK_a: palette = (Palette)((palette + 1) % PALETTE_SIZE);
-                        redraw = true;
-                        break;
-                    case SDLK_z: hideVals = !hideVals; redraw = true; break;
+                    switch (e.key.keysym.sym)
+                    {
+                        case SDLK_ESCAPE:
+                        case SDLK_q: run = false; break;
+                        case SDLK_r: recalc = true; break;
+                        case SDLK_t: redraw = true; break;
+                        case SDLK_b: changeBack = !changeBack; redraw = true; break;
+                        case SDLK_s: style = (Style)((style + 1) % STYLE_SIZE);
+                            redraw = true;
+                            break;
+                        case SDLK_h: help = !help; redraw = true; break;
+                        case SDLK_F12: SDL_StartTextInput(); savename = ""; getsavename = true; break;
+                        case SDLK_a: palette = (Palette)((palette + 1) % PALETTE_SIZE);
+                            redraw = true;
+                            break;
+                        case SDLK_z: hideVals = !hideVals; redraw = true; break;
+                    }
+                }
+                else
+                {
+                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                    {
+                        SDL_StopTextInput();
+                        getsavename = false;
+                    }
+                    else if (e.key.keysym.sym == SDLK_BACKSPACE)
+                    {
+                        if (savename.length() > 0)
+                        {
+                            savename.pop_back();
+                            updatetext = true;
+                        }
+                    }
+                    else if (e.key.keysym.sym == SDLK_RETURN || e.key.keysym.sym == SDLK_RETURN2)
+                    {
+                        //save the picture, upload the picture
+                        SDL_StopTextInput();
+                        getsavename = false;
+                    }
                 }
 
                 if (!run) break;
@@ -820,6 +870,16 @@ int main()
                 }
             }
 
+            if (help)
+            {
+
+            }
+
+            if (updatetext && getsavename)
+            {
+
+            }
+
             string strvals = "";
             if (!hideVals)
             {
@@ -834,32 +894,37 @@ int main()
                         "Inside: " + (changeBack ? "* " : "") + "{ " + to_string(backColor.r) + ", " + to_string(backColor.g) + ", " + to_string(backColor.b) + " }\n" +
                         "Style: " + StyleNames[style] + "\n";
                         "Iters: " + to_string(curiter) + "\n" + (hideVals ? "" : strvals);
-
-            SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
-            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
-            SDL_Rect r; r.x = 10; r.y = 5;
-            SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
-            SDL_RenderCopy(renderer, tex, NULL, &r);
-            SDL_FreeSurface(txt);
+            SDL_Texture *tex;
+            SDL_Rect *r = RenderFromText(renderer, tex, s, font, White, 500);
+            r->x = 10; r->y = 5;
+            //SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
+            //SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
+            //SDL_Rect r; r.x = 10; r.y = 5;
+            //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
+            SDL_RenderCopy(renderer, tex, NULL, r);
+            //SDL_FreeSurface(txt);
             if (palette == Linear)
             {
                 s = "{ " + to_string(linearColor.r) + ", " + to_string(linearColor.g) + ", " + to_string(linearColor.b) + " }";
-                txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), linearColor, 500);
-                tex = SDL_CreateTextureFromSurface(renderer, txt);
-                SDL_Rect r; r.x = 120; r.y = 5;
-                SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
-                SDL_RenderCopy(renderer, tex, NULL, &r);
-                SDL_FreeSurface(txt);
+                //txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), linearColor, 500);
+                //tex = SDL_CreateTextureFromSurface(renderer, txt);
+                r = RenderFromText(renderer, tex, s, font, linearColor, 500);
+                //SDL_Rect r; r.x = 120; r.y = 5;
+                r->x = 120;
+                //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
+                SDL_RenderCopy(renderer, tex, NULL, r);
+                //SDL_FreeSurface(txt);
             }
             else
             {
                 for (int i = 0; i < gradientScale; i++)
                 {
                     SDL_SetRenderDrawColor(renderer, gradient[palette - 1][i].r, gradient[palette - 1][i].g, gradient[palette - 1][i].b, 255);
-                    SDL_RenderDrawLine(renderer, 10, r.h + i + 5, 20, r.h + i + 5);
+                    SDL_RenderDrawLine(renderer, 10, r->h + i + 5, 20, r->h + i + 5);
                 }
             }
 
+            SDL_DestroyTexture(tex);
             SDL_RenderPresent(renderer);
             printf("Done.\n");
             redraw = false;
