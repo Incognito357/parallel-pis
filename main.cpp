@@ -430,15 +430,14 @@ int main()
                         case MessageType::ResX:
                         case MessageType::ResY:
                         {
-                            char* buf;
-                            int cl = 0;
+                            char* buf = new char[m.len];
+                            read(s, buf, m.len);
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
                                 if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
-                                m.len = cl;
                                 send(clients[j], &m, sizeof(m), 0);
-                                printf("Client %d is rendering %d\n", j, cl);
-                                cl++;
+                                send(clients[j], buf, m.len, 0);
+                                printf("Relay message %d to client %d\n", m.type, j);
                             }
                             break;
                         }
@@ -569,34 +568,6 @@ int main()
                     #endif
                     break;
                 }
-                case MessageType::OffX:
-                    #ifdef CLIENT
-
-                    #else
-                    read(sock, &mandl.offx, m.len);
-                    #endif
-                    break;
-                case MessageType::OffY:
-                    #ifdef CLIENT
-
-                    #else
-                    read(sock, &mandl.offy, m.len);
-                    #endif
-                    break;
-                case MessageType::Iter:
-                    #ifdef CLIENT
-
-                    #else
-                    read(sock, &mandl.iter, m.len);
-                    #endif
-                    break;
-                case MessageType::Zoom:
-                    #ifdef CLIENT
-
-                    #else
-                    read(sock, &mandl.zoom, m.len);
-                    #endif
-                    break;
                 case MessageType::Connections:
                     numclients = m.len;
                     printf("Number of clients is now: %d\n", numclients);
@@ -604,21 +575,72 @@ int main()
                     mandl.parallel_height = mandl.height / numclients;
                     #endif
                     break;
+                case MessageType::OffX:
+                {
+                    #ifdef CLIENT
+
+                    #else
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.offx, buf, m.len);
+                    #endif
+                    break;
+                }
+                case MessageType::OffY:
+                {
+                    #ifdef CLIENT
+
+                    #else
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.offy, buf, m.len);
+                    #endif
+                    break;
+                }
+                case MessageType::Iter:
+                {
+                    #ifdef CLIENT
+
+                    #else
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.iter, buf, m.len);
+                    #endif
+                    break;
+                }
+                case MessageType::Zoom:
+                {
+                    #ifdef CLIENT
+
+                    #else
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.zoom, buf, m.len);
+                    #endif
+                    break;
+                }
                 case MessageType::ResX:
+                {
                     #ifdef CLIENT
 
                     #else
-                    read(sock, &mandl.width, m.len);
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.width, buf, m.len);
                     #endif
                     break;
+                }
                 case MessageType::ResY:
+                {
                     #ifdef CLIENT
 
                     #else
-                    read(sock, &mandl.height, m.len);
-                    mandl.parallel_height = mandl.height / numclients;
+                    char* buf = new char[m.len];
+                    read(sock, buf, m.len);
+                    memcpy(&mandl.height, buf, m.len);
                     #endif
                     break;
+                }
                 case MessageType::Vals:
                 {
                     #ifdef CLIENT
