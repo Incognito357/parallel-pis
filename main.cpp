@@ -580,6 +580,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive off x\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.offx, buf, m.len);
@@ -591,6 +592,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive off y\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.offy, buf, m.len);
@@ -602,6 +604,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive iter\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.iter, buf, m.len);
@@ -613,6 +616,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive zoom\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.zoom, buf, m.len);
@@ -624,6 +628,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive res x\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.width, buf, m.len);
@@ -635,6 +640,7 @@ int main()
                     #ifdef CLIENT
 
                     #else
+                    printf("receive res y\n");
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.height, buf, m.len);
@@ -765,9 +771,11 @@ int main()
 
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
+                    printf("Sent off x %f\n", curoffx);
                     sm.type = OffY;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
+                    printf("Sent off y %f\n", curoffy);
                     //m.offx = loffx + (lx - mx) * m.zoom;
                     //m.offy = loffy + (ly - my) * m.zoom;
                     recalc = true;
@@ -807,12 +815,15 @@ int main()
                     sm.len = sizeof(long double);
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
+                    printf("Sent off x %f\n", curoffx);
                     sm.type = OffY;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
+                    printf("Sent off y %f\n", curoffy);
                     sm.type = Zoom;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curzoom, sm.len, 0);
+                    printf("Sent zoom %f\n", curzoom);
                     SDL_WarpMouseInWindow(w, resx / 2.0, resy / 2.0);
                     recalc = true;
                 }
@@ -825,6 +836,7 @@ int main()
                     sm.len = sizeof(long double);
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curzoom, m.len, 0);
+                    printf("Sent zoom %f\n", curzoom);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
                 }
@@ -861,6 +873,7 @@ int main()
                 sm.len = sizeof(int);
                 send(sock, &sm, sizeof(sm), 0);
                 send(sock, &curiter, sm.len, 0);
+                printf("Sent iter %d\n", curiter);
             }
 
 
