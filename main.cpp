@@ -779,14 +779,15 @@ int main()
                     {
                         Message sm;
                         sm.type = OffX;
-                        sm.len = sizeof(long double);
-
+                        sm.len = sizeof(sizeof(uint64_t));
+                        uint64_t tmp = pack754_64(curoffx);
                         send(sock, &sm, sizeof(sm), 0);
-                        send(sock, &curoffx, sm.len, 0);
+                        send(sock, &tmp, sm.len, 0);
                         printf("Sent off x %Lf\n", curoffx);
                         sm.type = OffY;
+                        tmp = pack754_64(curoffy);
                         send(sock, &sm, sizeof(sm), 0);
-                        send(sock, &curoffy, sm.len, 0);
+                        send(sock, &tmp, sm.len, 0);
                         printf("Sent off y %Lf\n", curoffy);
                         //m.offx = loffx + (lx - mx) * m.zoom;
                         //m.offy = loffy + (ly - my) * m.zoom;
@@ -822,17 +823,20 @@ int main()
                     //m.zoom /= 1.1 * e.wheel.y;
                     Message sm;
                     sm.type = OffX;
-                    sm.len = sizeof(long double);
+                    sm.len = sizeof(sizeof(uint64_t));
+                    uint64_t tmp = pack754_64(curoffx);
                     send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curoffx, sm.len, 0);
+                    send(sock, &tmp, sm.len, 0);
                     printf("Sent off x %Lf\n", curoffx);
                     sm.type = OffY;
+                    tmp = pack754_64(curoffy);
                     send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curoffy, sm.len, 0);
+                    send(sock, &tmp, sm.len, 0);
                     printf("Sent off y %Lf\n", curoffy);
                     sm.type = Zoom;
+                    tmp = pack754_64(curzoom);
                     send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curzoom, sm.len, 0);
+                    send(sock, &tmp, sm.len, 0);
                     printf("Sent zoom %Lf\n", curzoom);
                     SDL_WarpMouseInWindow(w, resx / 2.0, resy / 2.0);
                     recalc = true;
@@ -843,9 +847,10 @@ int main()
                     curzoom *= -1.1L * e.wheel.y;
                     Message sm;
                     sm.type = Zoom;
-                    sm.len = sizeof(long double);
+                    sm.len = sizeof(sizeof(uint64_t));
+                    uint64_t tmp = pack754_64(curzoom);
                     send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curzoom, m.len, 0);
+                    send(sock, &tmp, m.len, 0);
                     printf("Sent zoom %Lf\n", curzoom);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
