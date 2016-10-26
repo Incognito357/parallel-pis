@@ -14,8 +14,11 @@ using namespace std;
 
 #ifdef CLIENT
 
+#define DEBUG
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 #include <unordered_map>
 
 #include <curl/curl.h>
@@ -32,14 +35,11 @@ double scale(double v, double vl, double vh, double nl, double nh)
 
 SDL_Texture *RenderFromText(SDL_Renderer *r, SDL_Rect *rect, string t, TTF_Font *f, SDL_Color c, int wrap)
 {
-
     SDL_Surface *s = TTF_RenderText_Blended_Wrapped(f, t.c_str(), c, wrap);
     SDL_Texture *tex = SDL_CreateTextureFromSurface(r, s);
     if (tex == NULL) return NULL;
-    //rect->x = 0; rect->y = 0;
     rect->w = s->w;
     rect->h = s->h;
-    //SDL_QueryTexture(tex, NULL, NULL, &rect->w, &rect->h);
     SDL_FreeSurface(s);
     return tex;
 }
@@ -136,6 +136,8 @@ int main()
         return -1;
     }
 
+    #ifndef DEBUG
+
     struct addrinfo *i;
     for (int r = 0; r <= RETRYATTEMPTS; r++)
     {
@@ -173,6 +175,8 @@ int main()
     char saddr[INET_ADDRSTRLEN];
     inet_ntop(i->ai_family, &((struct sockaddr_in*)((struct sockaddr*)i->ai_addr))->sin_addr, saddr, sizeof(saddr));
     printf("Connecting to %s\n", saddr);
+
+    #endif
 
     #ifdef CLIENT
     char cltype = 2;
@@ -713,7 +717,7 @@ int main()
 
         #ifdef CLIENT
 
-        bool updatetext = false;
+        bool saveshot = false;
 
         while (SDL_PollEvent(&e))
         {
@@ -721,7 +725,7 @@ int main()
             else if (e.type == SDL_TEXTINPUT)
             {
                 savename += e.text.text;
-                updatetext = true;
+                redraw = true;
             }
             else if (e.type == SDL_KEYDOWN && !keys[e.key.keysym.sym])
             {
@@ -739,7 +743,7 @@ int main()
                             redraw = true;
                             break;
                         case SDLK_h: help = !help; redraw = true; break;
-                        case SDLK_F12: SDL_StartTextInput(); savename = ""; getsavename = true; break;
+                        case SDLK_F12: SDL_StartTextInput(); savename = ""; getsavename = true; redraw = true; break;
                         case SDLK_a: palette = (Palette)((palette + 1) % PALETTE_SIZE);
                             redraw = true;
                             break;
@@ -752,20 +756,22 @@ int main()
                     {
                         SDL_StopTextInput();
                         getsavename = false;
+                        redraw = true;
                     }
                     else if (e.key.keysym.sym == SDLK_BACKSPACE)
                     {
                         if (savename.length() > 0)
                         {
                             savename.pop_back();
-                            updatetext = true;
+                            redraw = true;
                         }
                     }
                     else if (e.key.keysym.sym == SDLK_RETURN || e.key.keysym.sym == SDLK_RETURN2)
                     {
-                        //save the picture, upload the picture
                         SDL_StopTextInput();
                         getsavename = false;
+                        redraw = true;
+                        saveshot = true;
                     }
                 }
 
@@ -979,12 +985,72 @@ int main()
                 }
             }
 
-            if (help)
+            if (saveshot)
             {
+                //save the screenshot of the fractal
+                SDL_Surface* saveSurface = NULL;
+                SDL_Surface* infoSurface = SDL_GetWindowSurface(w);
+                if (infoSurface == NULL) printf("Couldn't create surface from window: %s\n", SDL_GetError());
+                else
+                {
+                    unsigned char* pixels = new unsigned char[infoSurface->w * infoSurface->h * infoSurface->format->BytesPerPixel];
+                    if (pixels == 0) printf("Unable to allocate memory for screenshot pixel data buffer!\n");
+                    else
+                    {
+                        if (SDL_RenderReadPixels(renderer, &infoSurface->clip_rect, infoSurface->format->format, pixels, infoSurface->w * infoSurface->format->BytesPerPixel) != 0)
+                        {
+                            printf("Failed to read pixel data from SDL_Renderer object. %s\n", SDL_GetError());
+                            pixels = NULL;
+                        }
+                        else
+                        {
+                            saveSurface = SDL_CreateRGBSurfaceFrom(pixels, infoSurface->w, infoSurface->h, infoSurface->format->BitsPerPixel, infoSurface->w * infoSurface->format->BytesPerPixel, infoSurface->format->Rmask, infoSurface->format->Gmask, infoSurface->format->Bmask, infoSurface->format->Amask);
+                            if (saveSurface == NULL) printf("Couldn't create SDL_Surface from renderer pixel data. %s\n", SDL_GetError());
+                            IMG_SavePNG(saveSurface, (savename + ".png").c_str());
+                            SDL_FreeSurface(saveSurface);
+                            saveSurface = NULL;
+                        }
+                        delete[] pixels;
+                    }
+                    SDL_FreeSurface(infoSurface);
+                    infoSurface = NULL;
+                }
 
+                //send to php file on server
+                struct curl_httppost *form = NULL;
+                struct curl_httppost *lastptr = NULL;
+                struct curl_slist *headerlist = NULL;
+                static const char buf[] = "Expect:";
+
+                curl_formadd(&form, &lastptr,
+                             CURLFORM_COPYNAME, "bmp",
+                             CURLFORM_FILE, (savename + ".png").c_str(),
+                             CURLFORM_END);
+                curl_formadd(&form, &lastptr,
+                             CURLFORM_COPYNAME, "name",
+                             CURLFORM_COPYCONTENTS, savename.c_str(),
+                             CURLFORM_END);
+
+                headerlist = curl_slist_append(headerlist, buf);
+                CURL *curl;
+                if(curl)
+                {
+                    curl_global_init(CURL_GLOBAL_ALL);
+                    curl = curl_easy_init();
+                    curl_easy_setopt(curl, CURLOPT_URL, "24.229.247.51:8080/parallel_pis/parallel_pis.php");
+                    curl_easy_setopt(curl, CURLOPT_HTTPPOST, form);
+                    CURLcode res = curl_easy_perform(curl);
+                    if(res != CURLE_OK)
+                        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+                    curl_easy_cleanup(curl);
+                    curl_formfree(form);
+                    curl_slist_free_all (headerlist);
+                }
+                saveshot = false;
             }
 
-            if (updatetext && getsavename)
+            if (help)
             {
 
             }
@@ -1008,13 +1074,14 @@ int main()
             SDL_Texture *tex = RenderFromText(renderer, &r, s, font, White, 500);
             r.x = 10; r.y = 5;
             SDL_RenderCopy(renderer, tex, NULL, &r);
+            SDL_DestroyTexture(tex);
             if (palette == Linear)
             {
-                SDL_DestroyTexture(tex);
                 s = "{ " + to_string(linearColor.r) + ", " + to_string(linearColor.g) + ", " + to_string(linearColor.b) + " }";
                 tex = RenderFromText(renderer, &r, s, font, linearColor, 500);
                 r.x = 120;
                 SDL_RenderCopy(renderer, tex, NULL, &r);
+                SDL_DestroyTexture(tex);
             }
             else
             {
@@ -1025,7 +1092,14 @@ int main()
                 }
             }
 
-            SDL_DestroyTexture(tex);
+            if (getsavename)
+            {
+                tex = RenderFromText(renderer, &r, "Save As: " + savename, font, White, INIT_SCREEN_WIDTH - 20);
+                r.x = 10; r.y = INIT_SCREEN_HEIGHT - 50;
+                SDL_RenderCopy(renderer, tex, NULL, &r);
+                SDL_DestroyTexture(tex);
+            }
+
             SDL_RenderPresent(renderer);
             printf("Done.\n");
             redraw = false;
