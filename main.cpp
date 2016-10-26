@@ -36,13 +36,17 @@ SDL_Rect *RenderFromText(SDL_Renderer *r, SDL_Texture *tex, string t, TTF_Font *
     SDL_Surface *s = TTF_RenderText_Blended_Wrapped(f, t.c_str(), c, wrap);
     tex = SDL_CreateTextureFromSurface(r, s);
     if (tex == NULL) return NULL;
-    SDL_Rect *rect = new SDL_Rect();
+    static SDL_Rect *rect = new SDL_Rect();
     rect->x = 0; rect->y = 0;
     rect->w = s->w;
     rect->h = s->h;
     SDL_FreeSurface(s);
     return rect;
 }
+
+#elif defined(MASTER)
+
+#include <algorithm>
 
 #endif
 
@@ -75,7 +79,8 @@ int main()
     char cltypes[MAXCLIENTS];
     fd_set fds;
 
-    bool queuerecalc = false;
+    bool queuerecalc;
+    vector<int> needrecalc;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -112,6 +117,8 @@ int main()
 
     int addrlen = sizeof(addr);
     printf("Waiting for connections\n");
+
+    int valsreceived = 0;
 
     #else
 
@@ -374,13 +381,25 @@ int main()
                                 printf("Recalc already queued\n");
                                 break;
                             }
+                            else if (valsreceived < numclients)
+                            {
+                                printf("Queuing recalc\n");
+                                queuerecalc = true;
+                                for (int j = 0; j < MAXCLIENTS; j++)
+                                    if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
+                                    else needrecalc.push_back(j);
+                                break;
+                            }
+
                             if (numclients == 0)
                             {
                                 printf("No suitable clients connected to calculate!\n");
                                 break;
                             }
                             else printf("Begin rendering...\n");
+
                             int cl = 0;
+                            valsreceived = 0;
                             for (int j = 0; j < MAXCLIENTS; j++)
                             {
                                 if (j == i || clients[j] == 0 || cltypes[j] != 1) continue;
@@ -456,6 +475,21 @@ int main()
                                 }
                                 printf("Done.\n");
                                 found = true;
+                                valsreceived++;
+                                if (valsreceived == numclients) printf("Received all values\n");
+
+                                if (queuerecalc)
+                                {
+                                    vector<int>::iterator x;
+                                    if ((x = find(needrecalc.begin(), needrecalc.end(), cur)) != needrecalc.end())
+                                    {
+                                        needrecalc.erase(x);
+                                        m.type = Recalc;
+                                        m.len = cur;
+                                        send(cur, &m, sizeof(m), 0);
+                                        printf("Client %d is re-rendering %d\n", s, cur);
+                                    }
+                                }
                                 break;
                             }
                             if (!found) printf("Could not find suitable render client.\n");
@@ -597,7 +631,7 @@ int main()
                     }
                     printf("Read %d / %d bytes\n", ret, m.len);
                     printf("Done.\nCopying values into full array... moving to %d...", pos * m.len);
-                    memcpy(&vals[pos * m.len], buf, m.len);
+                    memcpy(&vals[(pos * m.len) / sizeof(short)], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
                     if (valsreceived >= numclients)
