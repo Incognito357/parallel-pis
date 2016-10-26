@@ -767,28 +767,32 @@ int main()
             else if (e.type == SDL_KEYUP && keys[e.key.keysym.sym]) keys[e.key.keysym.sym] = false;
             else if (e.type == SDL_MOUSEMOTION)
             {
+                mx = e.button.x;
+                my = e.button.y;
                 if (keys[e.button.button])
                 {
                     //SEND THESE COORDINATES
-                    Message sm;
-                    sm.type = OffX;
-                    sm.len = sizeof(long double);
                     curoffx = loffx + (lx - mx) * curzoom;
                     curoffy = loffy + (ly - my) * curzoom;
 
-                    send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curoffx, sm.len, 0);
-                    printf("Sent off x %Lf\n", curoffx);
-                    sm.type = OffY;
-                    send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &curoffy, sm.len, 0);
-                    printf("Sent off y %Lf\n", curoffy);
-                    //m.offx = loffx + (lx - mx) * m.zoom;
-                    //m.offy = loffy + (ly - my) * m.zoom;
-                    recalc = true;
+                    if (lx - mx != 0 || loffx == curoffx || ly - my != 0 || loffy == curoffy)
+                    {
+                        Message sm;
+                        sm.type = OffX;
+                        sm.len = sizeof(long double);
+
+                        send(sock, &sm, sizeof(sm), 0);
+                        send(sock, &curoffx, sm.len, 0);
+                        printf("Sent off x %Lf\n", curoffx);
+                        sm.type = OffY;
+                        send(sock, &sm, sizeof(sm), 0);
+                        send(sock, &curoffy, sm.len, 0);
+                        printf("Sent off y %Lf\n", curoffy);
+                        //m.offx = loffx + (lx - mx) * m.zoom;
+                        //m.offy = loffy + (ly - my) * m.zoom;
+                        recalc = true;
+                    }
                 }
-                mx = e.button.x;
-                my = e.button.y;
             }
             else if (e.type == SDL_MOUSEBUTTONDOWN && !keys[e.button.button])
             {
@@ -809,7 +813,6 @@ int main()
             {
                 if (e.wheel.y > 0)
                 {
-
                     //SEND THESE VALUES
                     loffx = curoffx = loffx + (mx * curzoom) - ((resx / 2.0L) * curzoom);
                     loffy = curoffy = loffy + (my * curzoom) - ((resy / 2.0L) * curzoom);
