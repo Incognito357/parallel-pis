@@ -992,25 +992,13 @@ int main()
             SDL_Rect r;
             SDL_Texture *tex = RenderFromText(renderer, &r, s, font, White, 500);
             r.x = 10; r.y = 5;
-            //SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
-            //SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
-            //SDL_Rect r; r.x = 10; r.y = 5;
-            //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
-            printf("%d, %d, %d, %d\n", r.x, r.y, r.w, r.h);
             SDL_RenderCopy(renderer, tex, NULL, &r);
-            //SDL_FreeSurface(txt);
             if (palette == Linear)
             {
                 s = "{ " + to_string(linearColor.r) + ", " + to_string(linearColor.g) + ", " + to_string(linearColor.b) + " }";
-                //txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), linearColor, 500);
-                //tex = SDL_CreateTextureFromSurface(renderer, txt);
-                //SDL_DestroyTexture(tex);
                 tex = RenderFromText(renderer, &r, s, font, linearColor, 500);
-                //SDL_Rect r; r.x = 120; r.y = 5;
                 r.x = 120;
-                //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
                 SDL_RenderCopy(renderer, tex, NULL, &r);
-                //SDL_FreeSurface(txt);
             }
             else
             {
@@ -1021,7 +1009,7 @@ int main()
                 }
             }
 
-            //SDL_DestroyTexture(tex);
+            SDL_DestroyTexture(tex);
             SDL_RenderPresent(renderer);
             printf("Done.\n");
             redraw = false;
