@@ -358,6 +358,12 @@ int main()
                     printf("Client %d (%s) disconnected\n", i, inet_ntoa(addr.sin_addr));
                     close(s);
                     clients[i] = 0;
+
+                    vector<int>::iterator x;
+                    if ((x = find(needrecalc.begin(), needrecalc.end(), i)) != needrecalc.end())
+                        needrecalc.erase(x);
+                    if (needrecalc.size() == 0) queuerecalc = false;
+
                     if (cltypes[i] == 1)
                     {
                         numclients--;
@@ -369,6 +375,7 @@ int main()
                             send(clients[j], &m, sizeof(m), 0);
                         }
                     }
+                    else if (cltypes[i] == 2) queuerecalc = false;
                     cltypes[i] = 0;
                 }
                 else
@@ -483,13 +490,13 @@ int main()
                                 if (queuerecalc)
                                 {
                                     vector<int>::iterator x;
-                                    if ((x = find(needrecalc.begin(), needrecalc.end(), cur)) != needrecalc.end())
+                                    if ((x = find(needrecalc.begin(), needrecalc.end(), i)) != needrecalc.end())
                                     {
                                         needrecalc.erase(x);
                                         m.type = Recalc;
                                         m.len = cur;
                                         send(cur, &m, sizeof(m), 0);
-                                        printf("Client %d is re-rendering %d\n", clients[*x], cur);
+                                        printf("Client %d is re-rendering %d\n", i, cur);
                                     }
                                     if (needrecalc.size() == 0) queuerecalc = false;
                                 }
