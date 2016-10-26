@@ -79,7 +79,7 @@ int main()
     char cltypes[MAXCLIENTS];
     fd_set fds;
 
-    bool queuerecalc;
+    bool queuerecalc = false;
     vector<int> needrecalc;
 
     for (int i = 0; i < MAXCLIENTS; i++) clients[i] = 0;
