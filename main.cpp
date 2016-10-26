@@ -375,8 +375,8 @@ int main()
                             send(clients[j], &m, sizeof(m), 0);
                         }
                     }
-
                     queuerecalc = false;
+                    recalc = false;
                     cltypes[i] = 0;
                 }
                 else
