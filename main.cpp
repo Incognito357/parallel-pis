@@ -585,6 +585,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.offx, buf, m.len);
+                    printf("\tgot: %Lf\n", mandl.offx);
                     #endif
                     break;
                 }
@@ -597,6 +598,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.offy, buf, m.len);
+                    printf("\tgot: %Lf\n", mandl.offy);
                     #endif
                     break;
                 }
@@ -609,6 +611,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.iter, buf, m.len);
+                    printf("\tgot: %d\n", mandl.iter);
                     #endif
                     break;
                 }
@@ -621,6 +624,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.zoom, buf, m.len);
+                    printf("\tgot: %Lf\n", mandl.zoom);
                     #endif
                     break;
                 }
@@ -633,6 +637,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.width, buf, m.len);
+                    printf("\tgot: %d\n", mandl.width);
                     #endif
                     break;
                 }
@@ -645,6 +650,7 @@ int main()
                     char* buf = new char[m.len];
                     read(sock, buf, m.len);
                     memcpy(&mandl.height, buf, m.len);
+                    printf("\tgot: %d\n", mandl.height);
                     #endif
                     break;
                 }
@@ -772,11 +778,11 @@ int main()
 
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
-                    printf("Sent off x %f\n", curoffx);
+                    printf("Sent off x %Lf\n", curoffx);
                     sm.type = OffY;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
-                    printf("Sent off y %f\n", curoffy);
+                    printf("Sent off y %Lf\n", curoffy);
                     //m.offx = loffx + (lx - mx) * m.zoom;
                     //m.offy = loffy + (ly - my) * m.zoom;
                     recalc = true;
@@ -816,15 +822,15 @@ int main()
                     sm.len = sizeof(long double);
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
-                    printf("Sent off x %f\n", curoffx);
+                    printf("Sent off x %Lf\n", curoffx);
                     sm.type = OffY;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
-                    printf("Sent off y %f\n", curoffy);
+                    printf("Sent off y %Lf\n", curoffy);
                     sm.type = Zoom;
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curzoom, sm.len, 0);
-                    printf("Sent zoom %f\n", curzoom);
+                    printf("Sent zoom %Lf\n", curzoom);
                     SDL_WarpMouseInWindow(w, resx / 2.0, resy / 2.0);
                     recalc = true;
                 }
@@ -837,7 +843,7 @@ int main()
                     sm.len = sizeof(long double);
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curzoom, m.len, 0);
-                    printf("Sent zoom %f\n", curzoom);
+                    printf("Sent zoom %Lf\n", curzoom);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
                 }
