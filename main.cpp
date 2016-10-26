@@ -489,7 +489,7 @@ int main()
                                         m.type = Recalc;
                                         m.len = cur;
                                         send(cur, &m, sizeof(m), 0);
-                                        printf("Client %d is re-rendering %d\n", s, cur);
+                                        printf("Client %d is re-rendering %d\n", clients[*x], cur);
                                     }
                                     if (needrecalc.size() == 0) queuerecalc = false;
                                 }
