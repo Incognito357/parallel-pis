@@ -65,6 +65,7 @@ int main()
     memset(&m, 0, sizeof(m));
     int sock;
     int numclients = 0;
+    bool run = true;
 
     #ifdef MASTER
 
@@ -253,7 +254,6 @@ int main()
     bool changeBack = false;
     bool hideVals = false;
     bool help = false;
-    bool run = true;
     long double loffx = 0L, loffy = 0L;
     long double curzoom = INIT_ZOOM;
     long double curoffx = 0L, curoffy = 0L;
