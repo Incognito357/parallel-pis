@@ -74,7 +74,7 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-lpthreads" />
+					<Add option="-lpthread" />
 				</Linker>
 			</Target>
 			<Target title="Client R">
@@ -118,7 +118,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lpthreads" />
+					<Add option="-lpthread" />
 				</Linker>
 			</Target>
 		</Build>

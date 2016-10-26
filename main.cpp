@@ -30,18 +30,18 @@ double scale(double v, double vl, double vh, double nl, double nh)
     return nl + (nh - nl) * (v - vl) / (vh - vl);
 }
 
-SDL_Rect RenderFromText(SDL_Renderer *r, SDL_Texture *tex, string t, TTF_Font *f, SDL_Color c, int wrap)
+SDL_Texture *RenderFromText(SDL_Renderer *r, SDL_Rect *rect, string t, TTF_Font *f, SDL_Color c, int wrap)
 {
-    if (tex != NULL) SDL_DestroyTexture(tex);
+
     SDL_Surface *s = TTF_RenderText_Blended_Wrapped(f, t.c_str(), c, wrap);
-    tex = SDL_CreateTextureFromSurface(r, s);
-    SDL_Rect rect;
-    if (tex == NULL) return rect;
-    rect.x = 0; rect.y = 0;
-    rect.w = s->w;
-    rect.h = s->h;
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(r, s);
+    if (tex == NULL) return NULL;
+    //rect->x = 0; rect->y = 0;
+    rect->w = s->w;
+    rect->h = s->h;
+    //SDL_QueryTexture(tex, NULL, NULL, &rect->w, &rect->h);
     SDL_FreeSurface(s);
-    return rect;
+    return tex;
 }
 
 #elif defined(MASTER)
@@ -989,13 +989,14 @@ int main()
                         "Style: " + StyleNames[style] + "\n";
                         "Iters: " + to_string(curiter) + "\n" + (hideVals ? "" : strvals);
 
-            SDL_Texture *tex;
-            SDL_Rect r = RenderFromText(renderer, tex, s, font, White, 500);
+            SDL_Rect r;
+            SDL_Texture *tex = RenderFromText(renderer, &r, s, font, White, 500);
             r.x = 10; r.y = 5;
             //SDL_Surface* txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), White, 500);
             //SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, txt);
             //SDL_Rect r; r.x = 10; r.y = 5;
             //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
+            printf("%d, %d, %d, %d\n", r.x, r.y, r.w, r.h);
             SDL_RenderCopy(renderer, tex, NULL, &r);
             //SDL_FreeSurface(txt);
             if (palette == Linear)
@@ -1003,7 +1004,8 @@ int main()
                 s = "{ " + to_string(linearColor.r) + ", " + to_string(linearColor.g) + ", " + to_string(linearColor.b) + " }";
                 //txt = TTF_RenderText_Blended_Wrapped(font, s.c_str(), linearColor, 500);
                 //tex = SDL_CreateTextureFromSurface(renderer, txt);
-                r = RenderFromText(renderer, tex, s, font, linearColor, 500);
+                //SDL_DestroyTexture(tex);
+                tex = RenderFromText(renderer, &r, s, font, linearColor, 500);
                 //SDL_Rect r; r.x = 120; r.y = 5;
                 r.x = 120;
                 //SDL_QueryTexture(tex, NULL, NULL, &r.w, &r.h);
@@ -1019,7 +1021,7 @@ int main()
                 }
             }
 
-            SDL_DestroyTexture(tex);
+            //SDL_DestroyTexture(tex);
             SDL_RenderPresent(renderer);
             printf("Done.\n");
             redraw = false;
