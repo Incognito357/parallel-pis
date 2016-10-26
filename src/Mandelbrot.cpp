@@ -10,7 +10,7 @@ void Mandelbrot::Update(short *vals) const
     int step = parallel_height / thread::hardware_concurrency();
     vector<thread> threads;
     for (int i = 0; i < parallel_height; i += step)
-        threads.push_back(thread(&Mandelbrot::Slice, *this, ref(vals), (parallel_pos * parallel_height) + i, min((parallel_pos * parallel_height) + i + step, parallel_pos * parallel_height)));
+        threads.push_back(thread(&Mandelbrot::Slice, *this, ref(vals), (parallel_pos * parallel_height) + i, min((parallel_pos * parallel_height) + i + step, (parallel_pos + 1) * parallel_height)));
     for (auto &t : threads) t.join();
 }
 

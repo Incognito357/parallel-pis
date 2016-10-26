@@ -36,11 +36,12 @@ SDL_Rect *RenderFromText(SDL_Renderer *r, SDL_Texture *tex, string t, TTF_Font *
     SDL_Surface *s = TTF_RenderText_Blended_Wrapped(f, t.c_str(), c, wrap);
     tex = SDL_CreateTextureFromSurface(r, s);
     if (tex == NULL) return NULL;
-    SDL_Rect *rect;
+    SDL_Rect *rect = new SDL_Rect();
     rect->x = 0; rect->y = 0;
     rect->w = s->w;
     rect->h = s->h;
     SDL_FreeSurface(s);
+    return rect;
 }
 
 #endif
@@ -595,8 +596,8 @@ int main()
                         ret += tmp;
                     }
                     printf("Read %d / %d bytes\n", ret, m.len);
-                    printf("Done.\nCopying values into full array... moving to %d...", pos * (m.len / sizeof(short)));
-                    memcpy(&vals[pos * (m.len / sizeof(short))], buf, m.len);
+                    printf("Done.\nCopying values into full array... moving to %d...", pos * m.len);
+                    memcpy(&vals[pos * m.len], buf, m.len);
                     printf("Done.\n");
                     valsreceived++;
                     if (valsreceived >= numclients)
