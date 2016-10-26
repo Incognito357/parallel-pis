@@ -763,8 +763,10 @@ int main()
                     curoffx = loffx + (lx - mx) * curzoom;
                     curoffy = loffy + (ly - my) * curzoom;
 
+                    send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
                     sm.type = OffY;
+                    send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
                     //m.offx = loffx + (lx - mx) * m.zoom;
                     //m.offy = loffy + (ly - my) * m.zoom;
@@ -803,10 +805,13 @@ int main()
                     Message sm;
                     sm.type = OffX;
                     sm.len = sizeof(long double);
+                    send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffx, sm.len, 0);
                     sm.type = OffY;
+                    send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curoffy, sm.len, 0);
                     sm.type = Zoom;
+                    send(sock, &sm, sizeof(sm), 0);
                     send(sock, &curzoom, sm.len, 0);
                     SDL_WarpMouseInWindow(w, resx / 2.0, resy / 2.0);
                     recalc = true;
@@ -818,7 +823,8 @@ int main()
                     Message sm;
                     sm.type = Zoom;
                     sm.len = sizeof(long double);
-                    send(sock, &curzoom, sm.len, 0);
+                    send(sock, &sm, sizeof(sm), 0);
+                    send(sock, &curzoom, m.len, 0);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
                 }
@@ -853,6 +859,7 @@ int main()
                 Message sm;
                 sm.type = Iter;
                 sm.len = sizeof(int);
+                send(sock, &sm, sizeof(sm), 0);
                 send(sock, &curiter, sm.len, 0);
             }
 
