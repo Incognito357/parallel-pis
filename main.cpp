@@ -14,7 +14,7 @@ using namespace std;
 
 #ifdef CLIENT
 
-#define DEBUG
+//#define DEBUG
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
