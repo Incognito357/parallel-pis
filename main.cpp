@@ -722,7 +722,7 @@ int main()
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT) return 0;
-            else if (e.type == SDL_TEXTINPUT)
+            else if (e.type == SDL_TEXTINPUT && getsavename)
             {
                 savename += e.text.text;
                 redraw = true;
@@ -792,7 +792,7 @@ int main()
                     {
                         Message sm;
                         sm.type = OffX;
-                        sm.len = sizeof(sizeof(uint64_t));
+                        sm.len = sizeof(uint64_t);
                         uint64_t tmp = pack754_64(curoffx);
                         send(sock, &sm, sizeof(sm), 0);
                         send(sock, &tmp, sm.len, 0);
@@ -836,7 +836,7 @@ int main()
                     //m.zoom /= 1.1 * e.wheel.y;
                     Message sm;
                     sm.type = OffX;
-                    sm.len = sizeof(sizeof(uint64_t));
+                    sm.len = sizeof(uint64_t);
                     uint64_t tmp = pack754_64(curoffx);
                     send(sock, &sm, sizeof(sm), 0);
                     send(sock, &tmp, sm.len, 0);
@@ -860,10 +860,10 @@ int main()
                     curzoom *= -1.1L * e.wheel.y;
                     Message sm;
                     sm.type = Zoom;
-                    sm.len = sizeof(sizeof(uint64_t));
+                    sm.len = sizeof(uint64_t);
                     uint64_t tmp = pack754_64(curzoom);
                     send(sock, &sm, sizeof(sm), 0);
-                    send(sock, &tmp, m.len, 0);
+                    send(sock, &tmp, sm.len, 0);
                     printf("Sent zoom %Lf\n", curzoom);
                     //m.zoom *= -1.1 * e.wheel.y;
                     recalc = true;
