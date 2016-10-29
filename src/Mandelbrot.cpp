@@ -5,7 +5,11 @@ Mandelbrot::Mandelbrot()
 
 }
 
+#ifdef DEBUG
+void Mandelbrot::Update(double *vals) const
+#else
 void Mandelbrot::Update(short *vals) const
+#endif
 {
     double stp = (double)parallel_height / thread::hardware_concurrency();
     int step = 0;
@@ -19,7 +23,11 @@ void Mandelbrot::Update(short *vals) const
     for (auto &t : threads) t.join();
 }
 
+#ifdef DEBUG
+void Mandelbrot::Slice(double *vals, int minY, int maxY) const
+#else
 void Mandelbrot::Slice(short *vals, int minY, int maxY) const
+#endif
 {
     long double real = 0L * zoom - width / 2.0L * zoom + offx;
     long double imags = minY * zoom - parallel_height / 2.0L * zoom + offy;
@@ -27,10 +35,11 @@ void Mandelbrot::Slice(short *vals, int minY, int maxY) const
     {
         long double imag = imags;
         for (int y = minY; y < maxY; y++, imag += zoom)
-        {
-            //printf("Accessing %d\n", (y - (parallel_pos * parallel_height)) * width + x);
+            #ifdef DEBUG
+            vals[(y - (parallel_pos * parallel_height)) * width + x] = Calculate(real, imag);
+            #else
             vals[(y - (parallel_pos * parallel_height)) * width + x] = (short)(Calculate(real, imag) * 100);
-        }
+            #endif
     }
 }
 

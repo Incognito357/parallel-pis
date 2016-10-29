@@ -12,7 +12,11 @@ class Mandelbrot
 {
     public:
         Mandelbrot();
+        #ifdef DEBUG
+        void Update(double *vals) const;
+        #else
         void Update(short *vals) const;
+        #endif
         int iter = INIT_ITER;
         int parallel_pos = 0;
         long double zoom = 0.004L;
@@ -21,7 +25,11 @@ class Mandelbrot
         int parallel_height = INIT_SCREEN_HEIGHT;
     protected:
     private:
+        #ifdef DEBUG
+        void Slice(double* vals, int minY, int maxY) const;
+        #else
         void Slice(short* vals, int minY, int maxY) const;
+        #endif
         double Calculate(long double r, long double i) const;
 };
 

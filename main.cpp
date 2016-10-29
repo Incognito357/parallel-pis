@@ -14,7 +14,9 @@ using namespace std;
 
 #ifdef CLIENT
 
-//#define DEBUG
+#ifdef DEBUG
+#include <Mandelbrot.h>
+#endif
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -260,7 +262,11 @@ int main()
     int curiter = lastiter;
     Style style = Banded;
     Palette palette = Linear;
+    #ifdef DEBUG
+    double *vals = new double[INIT_SCREEN_WIDTH * INIT_SCREEN_HEIGHT]();
+    #else
     short *vals = new short[INIT_SCREEN_HEIGHT * INIT_SCREEN_WIDTH]();
+    #endif
 
     bool redraw = false;
     bool recalc = true;
@@ -276,6 +282,12 @@ int main()
 
     string savename = "";
     bool getsavename = false;
+
+    #ifdef DEBUG
+
+    Mandelbrot mandl;
+
+    #endif
 
     #elif !defined(MASTER)
 
@@ -784,7 +796,6 @@ int main()
                 my = e.button.y;
                 if (keys[e.button.button])
                 {
-                    //SEND THESE COORDINATES
                     curoffx = loffx + (lx - mx) * curzoom;
                     curoffy = loffy + (ly - my) * curzoom;
 
@@ -804,6 +815,10 @@ int main()
                         printf("Sent off y %Lf\n", curoffy);
                         //m.offx = loffx + (lx - mx) * m.zoom;
                         //m.offy = loffy + (ly - my) * m.zoom;
+                        #ifdef DEBUG
+                        mandl.offx = curoffx;
+                        mandl.offy = curoffy;
+                        #endif
                         recalc = true;
                     }
                 }
@@ -834,6 +849,11 @@ int main()
                     //loffx = m.offx = loffx + (mx * m.zoom) - ((SCREEN_WIDTH / 2.0) * m.zoom);
                     //loffy = m.offy = loffy + (my * m.zoom) - ((SCREEN_HEIGHT / 2.0) * m.zoom);
                     //m.zoom /= 1.1 * e.wheel.y;
+                    #ifdef DEBUG
+                    mandl.offx = curoffx;
+                    mandl.offy = curoffy;
+                    mandl.zoom = curzoom;
+                    #endif
                     Message sm;
                     sm.type = OffX;
                     sm.len = sizeof(uint64_t);
@@ -866,6 +886,9 @@ int main()
                     send(sock, &tmp, sm.len, 0);
                     printf("Sent zoom %Lf\n", curzoom);
                     //m.zoom *= -1.1 * e.wheel.y;
+                    #ifdef DEBUG
+                    mandl.zoom = curzoom;
+                    #endif
                     recalc = true;
                 }
             }
@@ -896,6 +919,9 @@ int main()
             {
                 recalc = true;
                 lastiter = curiter;
+                #ifdef DEBUG
+                mandl.iter = curiter;
+                #endif
                 Message sm;
                 sm.type = Iter;
                 sm.len = sizeof(int);
@@ -914,7 +940,10 @@ int main()
 
         if (recalc)
         {
-            //m.Update(vals);
+            #ifdef DEBUG
+            mandl.Update(vals);
+            redraw = true;
+            #endif
 
             m.type = Recalc;
             m.len = 0;
@@ -934,7 +963,11 @@ int main()
             {
                 for (int x = 0; x < INIT_SCREEN_WIDTH; x++)
                 {
-                    double n = vals[y * INIT_SCREEN_WIDTH + x] / 100.0f;
+                    #ifdef DEBUG
+                    double n = vals[y * resx + x];
+                    #else
+                    double n = vals[y * INIT_SCREEN_HEIGHT + x] / 100.0f;
+                    #endif
                     if (n < 0) continue;
                     int k = (int)n;
                     if (style == Banded)
@@ -1067,7 +1100,7 @@ int main()
 
             string s = "Palette: " + string(!changeBack ? "* " : "") + PaletteNames[palette] + "\n" +
                         "Inside: " + (changeBack ? "* " : "") + "{ " + to_string(backColor.r) + ", " + to_string(backColor.g) + ", " + to_string(backColor.b) + " }\n" +
-                        "Style: " + StyleNames[style] + "\n";
+                        "Style: " + StyleNames[style] + "\n" +
                         "Iters: " + to_string(curiter) + "\n" + (hideVals ? "" : strvals);
 
             SDL_Rect r;

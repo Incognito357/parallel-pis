@@ -83,6 +83,8 @@ inline long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 
 #ifdef CLIENT
 
+#define DEBUG
+
 #define RETRYATTEMPTS 5
 
 #elif defined MASTER
